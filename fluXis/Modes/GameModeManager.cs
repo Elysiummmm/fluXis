@@ -3,6 +3,7 @@ using System.Linq;
 using fluXis.Modes.Keys;
 using fluXis.Utils;
 using JetBrains.Annotations;
+using rhym;
 
 namespace fluXis.Modes;
 

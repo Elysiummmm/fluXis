@@ -13,6 +13,7 @@ using fluXis.Utils;
 using JetBrains.Annotations;
 using Midori.Utils;
 using Newtonsoft.Json;
+using rhym;
 
 namespace fluXis.Map;
 
@@ -43,6 +44,7 @@ public class MapInfo
     public float HealthDifficulty { get; set; } = 8;
 
     [JsonProperty("mode")]
+    [JsonConverter(typeof(JsonResourceLocationConverter))]
     public ResourceLocation GameMode { get; set; } = new("flustix", "keys");
 
     [JsonProperty("dual")]

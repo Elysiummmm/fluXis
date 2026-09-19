@@ -9,6 +9,7 @@ using fluXis.Utils;
 using JetBrains.Annotations;
 using osu.Framework.Bindables;
 using osu.Framework.Timing;
+using rhym;
 
 namespace fluXis.Modes;
 
@@ -18,6 +19,8 @@ namespace fluXis.Modes;
 public abstract class GameMode : IFromAssembly
 {
     public abstract ResourceLocation Location { get; }
+
+    public abstract void RegisterObjects(RhymIO io);
 
     public abstract PlayableGameMode CreatePlayable(RulesetContainer ruleset, MapInfo map, MapEvents events, IMod[] mods);
 
