@@ -183,6 +183,11 @@ public enum ShaderType
     [ShaderStrength(2, ParamName = "Speed")]
     Glitch2,
 
+    [ShaderStrength(1, Max = 5f, ParamName = "ScrollSpeed")]
+    [ShaderStrength(2, Max = 10f, ParamName = "Scale")]
+    [ShaderStrength(3, Max = 4f, Step = 1f, ParamName = "Iterations")]
+    Warp,
+
     GaussianBlur,
 
     [ShaderStrength(1, Min = -1f)]
