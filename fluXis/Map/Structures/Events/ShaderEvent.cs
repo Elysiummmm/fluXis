@@ -188,6 +188,10 @@ public enum ShaderType
     [ShaderStrength(3, Max = 4f, Step = 1f, ParamName = "Iterations")]
     Warp,
 
+    [ShaderStrength(1, Max = 2f)]
+    [ShaderStrength(2, Min = -180f, Max = 180f, Step = 1f, ParamName = "Angle")]
+    Slice,
+
     GaussianBlur,
 
     [ShaderStrength(1, Min = -1f)]
