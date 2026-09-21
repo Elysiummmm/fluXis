@@ -170,6 +170,7 @@ public partial class ShaderStackContainer : Container, IBufferedDrawable
         ShaderType.Warp => new WarpShaderStep(),
         ShaderType.Slice => new SliceShaderStep(),
         ShaderType.Contrast => new ContrastShaderStep(),
+        ShaderType.Shatter => new ShatterShaderStep(),
         _ => null
     };
 
