@@ -6,7 +6,6 @@ using System.Linq;
 using fluXis.Database.Input;
 using fluXis.Database.Maps;
 using fluXis.Database.Score;
-using fluXis.Map;
 using fluXis.Utils;
 using osu.Framework.Development;
 using osu.Framework.Logging;
@@ -95,12 +94,12 @@ public class FluXisRealm : IDisposable
             case 3 or 4:
                 break; // nothing to do here
 
-            case 5:
-                var newMaps = migration.NewRealm.All<RealmMap>().ToList();
+            case 5: // i cba to convert this one, most likely this won't even cause issues
+                /*var newMaps = migration.NewRealm.All<RealmMap>().ToList();
 
                 foreach (var newMap in newMaps)
                 {
-                    MapInfo map = newMap.GetMapInfo();
+                    LegacyMapJson map = newMap.GetPlayable();
                     if (map == null) continue;
 
                     MapEvents events = new MapEvents();
@@ -114,7 +113,7 @@ public class FluXisRealm : IDisposable
                     }
 
                     newMap.Filters = MapUtils.GetMapFilters(map, events);
-                }
+                }*/
 
                 break;
 
@@ -218,7 +217,7 @@ public class FluXisRealm : IDisposable
 
             case 13:
             {
-                var sets = migration.NewRealm.All<RealmMapSet>().ToList();
+                /*var sets = migration.NewRealm.All<RealmMapSet>().ToList();
 
                 foreach (var set in sets)
                 {
@@ -228,10 +227,10 @@ public class FluXisRealm : IDisposable
                     {
                         map.LastLocalUpdate = DateTimeOffset.Now;
 
-                        var info = map.GetMapInfo();
+                        var info = map.GetPlayable();
                         map.AccuracyDifficulty = info?.AccuracyDifficulty ?? 8;
                     }
-                }
+                }*/
 
                 break;
             }
@@ -243,14 +242,14 @@ public class FluXisRealm : IDisposable
                 foreach (var filter in migration.NewRealm.All<RealmMapFilters>().ToList())
                     migration.NewRealm.Remove(filter);
 
-                foreach (var map in maps)
+                /*foreach (var map in maps)
                 {
-                    var info = map.GetMapInfo();
+                    var info = map.GetPlayable();
                     var events = info?.GetMapEvents();
 
                     var filters = MapUtils.GetMapFilters(info, events);
                     map.Filters = filters;
-                }
+                }*/
 
                 break;
             }

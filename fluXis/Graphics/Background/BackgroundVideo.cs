@@ -38,7 +38,7 @@ public partial class BackgroundVideo : CompositeDrawable
         };
     }
 
-    public void LoadVideo(MapInfo map)
+    public void LoadVideo(PlayableMap map)
     {
         if (video != null)
         {
@@ -67,7 +67,7 @@ public partial class BackgroundVideo : CompositeDrawable
 
         try
         {
-            var stream = map?.GetVideoStream();
+            var stream = map.Storage.GetStream(map.VideoFile);
 
             if (stream == null)
                 return;

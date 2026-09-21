@@ -4,7 +4,7 @@ using System.Linq;
 using fluXis.Configuration;
 using fluXis.Database;
 using fluXis.Database.Maps;
-using fluXis.Map.Structures;
+using fluXis.Map.Structures.Events;
 using fluXis.Skinning;
 using osu.Framework.Allocation;
 using osu.Framework.Audio;
@@ -33,7 +33,7 @@ public partial class Hitsounding : CompositeDrawable
     private List<HitSoundChannel> channels { get; } = new();
 
     private RealmMapSet set { get; }
-    private List<HitSoundFade> fades { get; }
+    private HitSoundFade[] fades { get; }
     private Bindable<double> rate { get; }
 
     /// <summary>
@@ -45,7 +45,7 @@ public partial class Hitsounding : CompositeDrawable
     private Bindable<double> userVolume;
     private Bindable<double> volume;
 
-    public Hitsounding(RealmMapSet set, List<HitSoundFade> fades, Bindable<double> rate)
+    public Hitsounding(RealmMapSet set, HitSoundFade[] fades, Bindable<double> rate)
     {
         this.set = set;
         this.fades = fades;

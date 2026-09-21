@@ -68,7 +68,7 @@ public partial class StoryboardTab : EditorTab
 
         LoadComponent(dynamicStoryboard = new DrawableDynamicStoryboard
         (
-            new Bindable<MapInfo>(map.MapInfo),
+            new Bindable<PlayableMap>(map.Playable),
             new Bindable<Storyboard>(storyboard),
             editor.MapSetPath
         ));
@@ -362,7 +362,7 @@ public partial class StoryboardTab : EditorTab
 
         if (clock.IsRunning)
         {
-            var tp = map.MapInfo.GetTimingPoint(clock.CurrentTime);
+            var tp = map.Playable.GetTimingPoint(clock.CurrentTime);
             amount *= 4 * (tp.BPM / 120);
         }
 

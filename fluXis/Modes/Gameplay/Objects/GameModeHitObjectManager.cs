@@ -27,17 +27,15 @@ public abstract partial class GameModeHitObjectManager : CompositeDrawable
     protected Playfield Playfield { get; private set; } = null!;
 
     protected RulesetContainer Ruleset { get; }
-    protected MapInfo Map { get; }
-    protected MapEvents Events { get; }
+    protected PlayableMap Map { get; }
 
     [UsedImplicitly]
     public double VisualTimeOffset { get; set; }
 
-    protected GameModeHitObjectManager(RulesetContainer ruleset, MapInfo map, MapEvents events)
+    protected GameModeHitObjectManager(RulesetContainer ruleset, PlayableMap map)
     {
         Ruleset = ruleset;
         Map = map;
-        Events = events;
 
         AlwaysPresent = true;
         ActiveObjects = new Container<DrawableHitObject>().WithRelativeSize(Axes.Both);
@@ -86,7 +84,8 @@ public abstract partial class GameModeHitObjectManager : CompositeDrawable
         foreach (var hitObject in ActiveObjects.Where(h => h.CanBeRemoved).ToList())
             removeObject(hitObject);
 
-        while (Ruleset.AllowReverting && PastObjects.Count > 0)
+        // TODO: store results better
+        /*while (Ruleset.AllowReverting && PastObjects.Count > 0)
         {
             var result = PastObjects.Peek().Result;
 
@@ -94,7 +93,7 @@ public abstract partial class GameModeHitObjectManager : CompositeDrawable
                 break;
 
             revertObject(PastObjects.Pop());
-        }
+        }*/
     }
 
     #region Objects
@@ -134,11 +133,11 @@ public abstract partial class GameModeHitObjectManager : CompositeDrawable
     {
         if (!Playfield.IsSubPlayfield)
         {
-            if (obj.HoldEndResult is not null)
+            /*if (obj.HoldEndResult is not null)
                 Player.JudgementProcessor.RevertResult(obj.HoldEndResult.Value);
 
             if (obj.Result is not null)
-                Player.JudgementProcessor.RevertResult(obj.Result.Value);
+                Player.JudgementProcessor.RevertResult(obj.Result.Value);*/
         }
 
         var draw = createObject(obj);

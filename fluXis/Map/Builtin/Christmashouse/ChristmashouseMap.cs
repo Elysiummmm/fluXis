@@ -1,5 +1,6 @@
 using System.IO;
 using fluXis.Database.Maps;
+using fluXis.Modes;
 using osu.Framework.Audio.Track;
 using osu.Framework.Graphics.Textures;
 using Realms;
@@ -21,7 +22,7 @@ public class ChristmashouseMap : RealmMap
         };
     }
 
-    public override MapInfo GetMapInfo() => null;
+    public override PlayableMap GetPlayable(GameModeManager modes) => null;
     public override Texture GetBackground() => null;
     public override Stream GetBackgroundStream() => null;
 

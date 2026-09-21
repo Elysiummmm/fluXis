@@ -52,23 +52,13 @@ public partial class ChartingSidebar : PointsSidebar
 
                 if (selected is { } hit)
                 {
-                    inspector.AddSection("Hit Type", hit.Type switch
-                    {
-                        HitObjectType.Normal when !hit.LongNote => "Single",
-                        HitObjectType.Normal when hit.LongNote => "Long",
-                        HitObjectType.Tick => "Tick",
-                        HitObjectType.Landmine => "Landmine",
-                        _ => "Unknown"
-                    });
-
+                    inspector.AddSection("Hit Type", hit.GetType().Name);
                     inspector.AddSection("Lane", $"{hit.Lane}");
 
-                    switch (hit.Type)
+                    if (hit is IHasDuration d)
                     {
-                        case 0 when hit.LongNote:
-                            inspector.AddSection("Length", $"{hit.HoldTime:#,0.##}ms");
-                            inspector.AddSection("End Time", TimeUtils.Format(hit.EndTime));
-                            break;
+                        inspector.AddSection("Length", $"{d.Duration:#,0.##}ms");
+                        inspector.AddSection("End Time", TimeUtils.Format(d.GetEndTime()));
                     }
                 }
 

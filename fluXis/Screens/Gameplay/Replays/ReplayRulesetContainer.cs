@@ -7,7 +7,6 @@ using fluXis.Modes;
 using fluXis.Modes.Gameplay.Input;
 using fluXis.Mods;
 using fluXis.Replays;
-using fluXis.Screens.Gameplay.Input;
 using fluXis.Screens.Gameplay.Ruleset;
 using osu.Framework.Timing;
 
@@ -39,8 +38,8 @@ public partial class ReplayRulesetContainer : RulesetContainer, IFrameBasedClock
 
     private IGameModeActions actions => PlayableMode.Keybinds as IGameModeActions;
 
-    public ReplayRulesetContainer(GameMode mode, Replay replay, MapInfo map, MapEvents events, List<IMod> mods)
-        : base(mode, map, events, mods)
+    public ReplayRulesetContainer(GameMode mode, Replay replay, PlayableMap map, List<IMod> mods)
+        : base(mode, map, mods)
     {
         Replay = replay;
         AllowReverting = true;
@@ -57,8 +56,6 @@ public partial class ReplayRulesetContainer : RulesetContainer, IFrameBasedClock
         base.LoadComplete();
         actions.HandlePlayerInput = false;
     }
-
-    protected override GameplayInput CreateInput() => new ReplayInput(IsPaused.GetBoundCopy(), MapInfo.RealmEntry!.KeyCount, MapInfo.IsDual);
 
     private int skippedFrames = 0;
     private double skipElapsed = 0;

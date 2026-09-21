@@ -1,3 +1,4 @@
+/*
 using System;
 using fluXis.Input;
 using fluXis.Map.Structures;
@@ -115,3 +116,4 @@ public abstract partial class DrawableHitObject : CompositeDrawable, IKeyBinding
     bool IKeyBindingHandler<FluXisGameplayKeybind>.OnPressed(KeyBindingPressEvent<FluXisGameplayKeybind> e) => OnPressed(e.Action);
     void IKeyBindingHandler<FluXisGameplayKeybind>.OnReleased(KeyBindingReleaseEvent<FluXisGameplayKeybind> e) => OnReleased(e.Action);
 }
+*/

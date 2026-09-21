@@ -42,7 +42,7 @@ public partial class SoloSelectScreen : SelectScreen
             return;
         }
 
-        var loadedMap = map.GetMapInfo();
+        var loadedMap = map.GetPlayable(Game.GameModes);
         if (loadedMap == null) return;
 
         var editor = new EditorLoader(map, loadedMap);
@@ -77,7 +77,7 @@ public partial class SoloSelectScreen : SelectScreen
         {
             ContinueToReplay(map, mods, () =>
             {
-                var info = map.GetMapInfo(mods);
+                var info = map.GetPlayable(Game.GameModes, mods);
                 var autogen = new AutoGenerator(info, map.KeyCount);
                 return autogen.Generate();
             });

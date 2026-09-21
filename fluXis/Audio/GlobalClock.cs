@@ -1,13 +1,12 @@
 using System;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading.Tasks;
 using fluXis.Audio.FFT;
 using fluXis.Audio.Transforms;
 using fluXis.Configuration;
 using fluXis.Database.Maps;
 using fluXis.Map;
-using fluXis.Screens;
+using fluXis.Modes;
 using JetBrains.Annotations;
 using osu.Framework.Allocation;
 using osu.Framework.Audio;
@@ -24,13 +23,13 @@ namespace fluXis.Audio;
 public partial class GlobalClock : TransformableClock, IAdjustableClock, IFrameBasedClock, ISourceChangeableClock, IBeatSyncProvider, IAmplitudeProvider
 {
     [Resolved]
-    private FluXisScreenStack screens { get; set; }
-
-    [Resolved]
     private MapStore maps { get; set; }
 
     [Resolved]
     private ITrackStore tracks { get; set; }
+
+    [Resolved]
+    private GameModeManager modes { get; set; }
 
     [Resolved(CanBeNull = true)]
     private AudioAnalyzer analyzer { get; set; }
@@ -75,7 +74,7 @@ public partial class GlobalClock : TransformableClock, IAdjustableClock, IFrameB
     private string trackPath;
 
     [CanBeNull]
-    private MapInfo mapInfo { get; set; }
+    private PlayableMap map { get; set; }
 
     private FramedMapClock underlying { get; }
     private Bindable<DrawableTrack> track { get; } = new();
@@ -139,13 +138,13 @@ public partial class GlobalClock : TransformableClock, IAdjustableClock, IFrameB
     {
         // reset stuff
         AllowLimitedLoop = false;
-        mapInfo = null;
+        map = null;
 
         ChangeSource(info.GetTrack() ?? tracks.GetVirtual());
         Seek(0);
         Start();
 
-        Task.Run(() => mapInfo = info.GetMapInfo());
+        Task.Run(() => map = info.GetPlayable(modes));
     }
 
     public override void Reset()
@@ -248,10 +247,10 @@ public partial class GlobalClock : TransformableClock, IAdjustableClock, IFrameB
         step = 0;
         stepTime = 1000;
 
-        if (mapInfo == null) return;
-        if (!mapInfo.TimingPoints.Any()) return;
+        if (map == null)
+            return;
 
-        var point = mapInfo.GetTimingPoint(CurrentTime);
+        var point = map.GetTimingPoint(CurrentTime);
 
         stepTime = 60000f / point.BPM / 4;
 

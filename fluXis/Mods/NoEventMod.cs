@@ -1,11 +1,12 @@
 ﻿using System;
 using fluXis.Graphics.Sprites.Icons;
 using fluXis.Map;
+using fluXis.Map.Structures.Bases;
 using osu.Framework.Graphics.Sprites;
 
 namespace fluXis.Mods;
 
-public class NoEventMod : IMod, IApplicableToEvents
+public class NoEventMod : IMod, IApplicableToMap
 {
     public string Name => "No Events";
     public string Acronym => "NEV";
@@ -16,17 +17,9 @@ public class NoEventMod : IMod, IApplicableToEvents
     public bool Rankable => false;
     public Type[] IncompatibleMods => Array.Empty<Type>();
 
-    public void Apply(MapEvents events)
+    public void Apply(PlayableMap map)
     {
-        events.FlashEvents.Clear();
-        events.ColorFadeEvents.Clear();
-        events.PulseEvents.Clear();
-        events.PlayfieldMoveEvents.Clear();
-        events.PlayfieldScaleEvents.Clear();
-        events.PlayfieldRotateEvents.Clear();
-        events.LayerFadeEvents.Clear();
-        events.ShakeEvents.Clear();
-        events.ShaderEvents.Clear();
-        events.BeatPulseEvents.Clear();
+        var objs = map.ObjectsOfType<IMapEvent>();
+        map.RemoveObjects(objs);
     }
 }

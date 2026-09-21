@@ -36,7 +36,7 @@ public class HealthProcessor : JudgementDependant
     public double FailTime { get; private set; }
 
     protected float Difficulty { get; }
-    protected MapInfo Map { get; private set; }
+    protected PlayableMap Map { get; private set; }
 
     public HealthProcessor(float difficulty)
     {
@@ -62,7 +62,7 @@ public class HealthProcessor : JudgementDependant
             Health.Value = Health.MinValue;
     }
 
-    public override void ApplyMap(MapInfo map) => Map = map;
+    public override void ApplyMap(PlayableMap map) => Map = map;
 
     public override void AddResult(HitResult result)
     {

@@ -232,7 +232,7 @@ public abstract partial class EditorTabContainer : CompositeDrawable, IKeyBindin
 
         if (EditorClock.IsRunning)
         {
-            var tp = Map.MapInfo.GetTimingPoint(EditorClock.CurrentTime);
+            var tp = Map.Playable.GetTimingPoint(EditorClock.CurrentTime);
             amount *= 4 * (tp.BPM / 120);
         }
 

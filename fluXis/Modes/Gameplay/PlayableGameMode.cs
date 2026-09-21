@@ -21,8 +21,7 @@ namespace fluXis.Modes.Gameplay;
 public abstract partial class PlayableGameMode : CompositeDrawable
 {
     protected RulesetContainer Ruleset { get; }
-    protected MapInfo Map { get; }
-    protected MapEvents Events { get; }
+    protected PlayableMap Map { get; }
     protected IMod[] Mods { get; }
 
     public HitWindows HitWindows { get; private set; } = null!;
@@ -36,12 +35,12 @@ public abstract partial class PlayableGameMode : CompositeDrawable
     public GameModePlayer FirstPlayer => Players[0];
 
     public bool AnyFailed => Players.Any(p => p.HealthProcessor.Failed);
+    public virtual int DefaultGroupCount => 1;
 
-    protected PlayableGameMode(RulesetContainer ruleset, MapInfo map, MapEvents events, IMod[] mods)
+    protected PlayableGameMode(RulesetContainer ruleset, PlayableMap map, IMod[] mods)
     {
         Ruleset = ruleset;
         Map = map;
-        Events = events;
         Mods = mods;
     }
 
@@ -49,12 +48,13 @@ public abstract partial class PlayableGameMode : CompositeDrawable
     private void load()
     {
         RelativeSizeAxes = Axes.Both;
-        InternalChild = Keybinds = CreateBindContainer()
-                                   .WithRelativeSize(Axes.Both)
-                                   .WithChild(CreatePlayerGrid(Players));
 
+        Keybinds = CreateBindContainer();
         Dependencies.CacheAs(Keybinds);
         Dependencies.Cache(Keybinds);
+
+        InternalChild = Keybinds.WithRelativeSize(Axes.Both)
+                                .WithChild(CreatePlayerGrid(Players));
 
         HitWindows = CreateHitWindowFor(null);
     }

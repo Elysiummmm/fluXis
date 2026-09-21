@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Linq;
 using fluXis.Configuration;
 using fluXis.Graphics.Sprites.Icons;
@@ -19,8 +18,6 @@ public partial class LaneSwitchAlert : Container
 
     [Resolved]
     private RulesetContainer ruleset { get; set; }
-
-    private IList<LaneSwitchEvent> events => ruleset.MapEvents.LaneSwitchEvents;
 
     private SpriteIcon leftIcon;
     private SpriteIcon rightIcon;
@@ -78,18 +75,20 @@ public partial class LaneSwitchAlert : Container
     {
         ClearTransforms();
 
-        if (events.Count == 0 || !config.Get<bool>(FluXisSetting.LaneSwitchAlerts))
+        var events = ruleset.Map.ObjectsOfType<LaneSwitchEvent>();
+
+        if (events.Length == 0 || !config.Get<bool>(FluXisSetting.LaneSwitchAlerts))
             return;
 
         var last = events.First();
 
-        for (int i = 1; i < events.Count; i++)
+        for (int i = 1; i < events.Length; i++)
         {
             var current = events[i];
 
             if (current.Count != last.Count)
             {
-                var timing = ruleset.MapInfo.GetTimingPoint(current.Time);
+                var timing = ruleset.Map.GetTimingPoint(current.Time);
                 var beat = timing.MsPerBeat;
                 var fade = beat / 2f;
 

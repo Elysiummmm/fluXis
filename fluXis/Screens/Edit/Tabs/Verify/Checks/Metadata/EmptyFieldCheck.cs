@@ -6,10 +6,9 @@ public class EmptyFieldCheck : IVerifyCheck
 {
     public IEnumerable<VerifyIssue> Check(IVerifyContext ctx)
     {
-        var info = ctx.MapInfo;
-        var metadata = info.Metadata;
+        var map = ctx.Map;
 
-        if (string.IsNullOrWhiteSpace(metadata.Title))
+        if (string.IsNullOrWhiteSpace(map.Title))
         {
             yield return new VerifyIssue(
                 VerifyIssueSeverity.Problematic,
@@ -19,7 +18,7 @@ public class EmptyFieldCheck : IVerifyCheck
             );
         }
 
-        if (string.IsNullOrWhiteSpace(metadata.Artist))
+        if (string.IsNullOrWhiteSpace(map.Artist))
         {
             yield return new VerifyIssue(
                 VerifyIssueSeverity.Problematic,
@@ -29,7 +28,7 @@ public class EmptyFieldCheck : IVerifyCheck
             );
         }
 
-        if (string.IsNullOrWhiteSpace(metadata.Difficulty))
+        if (string.IsNullOrWhiteSpace(map.Difficulty))
         {
             yield return new VerifyIssue(
                 VerifyIssueSeverity.Problematic,

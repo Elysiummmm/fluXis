@@ -3,10 +3,10 @@ using fluXis.Skinning.Default;
 using Newtonsoft.Json;
 using osu.Framework.Graphics;
 
-namespace fluXis.Map;
+namespace fluXis.Map.Format.Legacy;
 
 [JsonObject(MemberSerialization.OptIn)]
-public class MapColors : ICustomColorProvider
+public class LegacyMapColors : ICustomColorProvider
 {
     [JsonProperty("accent")]
     public string AccentHex { get; set; } = "";

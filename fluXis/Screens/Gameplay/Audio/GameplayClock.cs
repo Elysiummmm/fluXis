@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using fluXis.Audio;
 using fluXis.Audio.Transforms;
 using fluXis.Configuration;
@@ -25,7 +24,7 @@ public partial class GameplayClock : TransformableClock, IFrameBasedClock, ISour
     public override double FramesPerSecond => underlying.FramesPerSecond;
     public IClock Source => underlying.Source;
 
-    private MapInfo mapInfo { get; }
+    private PlayableMap map { get; }
     private ITrackStore tracks { get; }
 
     public DrawableTrack Track { get; private set; }
@@ -35,7 +34,7 @@ public partial class GameplayClock : TransformableClock, IFrameBasedClock, ISour
 
     public event Action<double, double> OnSeek;
 
-    public GameplayClock(ITrackStore tracks, MapInfo info, Track track, double mapOffset, bool useOffset)
+    public GameplayClock(ITrackStore tracks, PlayableMap map, Track track, double mapOffset, bool useOffset)
     {
         this.tracks = tracks;
         this.mapOffset = mapOffset;
@@ -44,7 +43,7 @@ public partial class GameplayClock : TransformableClock, IFrameBasedClock, ISour
         underlying = new FramedMapClock();
         AddInternal(underlying);
 
-        mapInfo = info;
+        this.map = map;
         ChangeSource(track);
     }
 
@@ -131,10 +130,9 @@ public partial class GameplayClock : TransformableClock, IFrameBasedClock, ISour
         step = 0;
         stepTime = 1000;
 
-        if (mapInfo == null) return;
-        if (!mapInfo.TimingPoints.Any()) return;
+        if (map == null) return;
 
-        var point = mapInfo.GetTimingPoint(CurrentTime);
+        var point = map.GetTimingPoint(CurrentTime);
 
         stepTime = 60000f / point.BPM / 4;
 

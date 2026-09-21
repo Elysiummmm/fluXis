@@ -1,4 +1,5 @@
 using System.Linq;
+using fluXis.Map.Structures.Events;
 using fluXis.Modes.Gameplay;
 using fluXis.Mods;
 using fluXis.Utils.Extensions;
@@ -15,9 +16,9 @@ public partial class KeysPlayer : GameModePlayer
     protected override void BeforeLoad()
     {
         AddInternal(Dependencies.CacheAsAndReturn(new LaneSwitchManager(
-            Ruleset.MapEvents.LaneSwitchEvents,
-            Ruleset.MapInfo.RealmEntry!.KeyCount,
-            Ruleset.MapInfo.NewLaneSwitchLayout,
+            Ruleset.Map.ObjectsOfType<LaneSwitchEvent>(),
+            (Ruleset.PlayableMode as KeysPlayableGameMode)!.KeyCount,
+            !Ruleset.Map.LegacyLaneSwitchLayout,
             Ruleset.Mods.Any(x => x is MirrorMod)
         )));
     }

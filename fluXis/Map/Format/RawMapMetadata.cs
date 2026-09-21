@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.ComponentModel;
 using rhym.Format;
 using YamlDotNet.Serialization;
 
@@ -6,16 +7,16 @@ namespace fluXis.Map.Format;
 
 public class RawMapMetadata : RhymMetadata
 {
-    [YamlMember(Alias = "flux:title")]
+    [DefaultValue(""), YamlMember(Alias = "flux:title")]
     public string TitleRomanized { get; set; } = string.Empty;
 
-    [YamlMember(Alias = "flux:artist")]
+    [DefaultValue(""), YamlMember(Alias = "flux:artist")]
     public string ArtistRomanized { get; set; } = string.Empty;
 
-    [YamlMember(Alias = "flux:difficulty")]
+    [DefaultValue(""), YamlMember(Alias = "flux:difficulty")]
     public string Difficulty { get; set; } = string.Empty;
 
-    [YamlMember(Alias = "flux:preview")]
+    [DefaultValue(0), YamlMember(Alias = "flux:preview")]
     public int PreviewTime { get; set; }
 
     [YamlMember(Alias = "flux:colors")]
@@ -25,5 +26,5 @@ public class RawMapMetadata : RhymMetadata
     public Dictionary<string, string> Sources { get; set; } = [];
 
     [YamlMember(Alias = "flux:tags")]
-    public List<string> Tags { get; set; } = [];
+    public string[] Tags { get; set; } = [];
 }

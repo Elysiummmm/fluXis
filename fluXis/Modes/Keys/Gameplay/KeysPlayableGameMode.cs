@@ -17,22 +17,26 @@ namespace fluXis.Modes.Keys.Gameplay;
 
 public partial class KeysPlayableGameMode : PlayableGameMode
 {
+    public int KeyCount { get; }
+    public override int DefaultGroupCount => KeyCount;
+
     public override GameModePlayer[] Players { get; }
 
     private HitWindows? hitWindows;
     private HitWindows? releaseWindows;
     private HitWindows? landmineWindows;
 
-    public KeysPlayableGameMode(RulesetContainer ruleset, MapInfo map, MapEvents events, IMod[] mods)
-        : base(ruleset, map, events, mods)
+    public KeysPlayableGameMode(RulesetContainer ruleset, PlayableMap map, IMod[] mods)
+        : base(ruleset, map, mods)
     {
+        KeyCount = KeysGameMode.ParseMode(map.Mode);
         var count = map.IsDual ? 2 : 1;
 
         Players = new GameModePlayer[count];
         for (var i = 0; i < Players.Length; i++) Players[i] = new KeysPlayer(i);
     }
 
-    protected override KeyBindingContainer CreateBindContainer() => new KeysKeybindContainer(Map.RealmEntry!.KeyCount, Map.IsDual);
+    protected override KeyBindingContainer CreateBindContainer() => new KeysKeybindContainer(KeyCount, Map.IsDual);
 
     protected override GridContainer CreatePlayerGrid(IEnumerable<Drawable> drawable) => new()
     {

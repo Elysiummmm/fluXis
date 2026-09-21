@@ -1,11 +1,14 @@
 using System;
 using System.Linq;
 using fluXis.Configuration;
+using fluXis.Map.Structures;
+using fluXis.Map.Structures.Events.Scrolling;
 using fluXis.Modes.Gameplay;
 using fluXis.Modes.Keys.Gameplay.Objects;
 using fluXis.Modes.Keys.Gameplay.UI;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
+using osu.Framework.Extensions.IEnumerableExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Utils;
@@ -56,13 +59,13 @@ public partial class KeysPlayfield : Playfield
             Anchor = Anchor.Centre,
             Origin = Anchor.Centre,
             Direction = FillDirection.Horizontal,
-            ChildrenEnumerable = Enumerable.Range(0, RealmMap.KeyCount).Select(i => new Receptor(i)),
-            Padding = new MarginPadding { Bottom = Skin.SkinJson.GetKeymode(RealmMap.KeyCount).ReceptorOffset }
+            ChildrenEnumerable = Enumerable.Range(0, (Ruleset.PlayableMode as KeysPlayableGameMode)!.KeyCount).Select(i => new Receptor(i)),
+            Padding = new MarginPadding { Bottom = Skin.SkinJson.GetKeymode((Ruleset.PlayableMode as KeysPlayableGameMode)!.KeyCount).ReceptorOffset }
         };
 
-        Objects = new KeysHitObjectManager(Ruleset, MapInfo, MapEvents, MapInfo.HitObjects);
+        Objects = new KeysHitObjectManager(Ruleset, Map, Map.ObjectsOfType<HitObject>());
 
-        var receptorsFirst = Skin.SkinJson.GetKeymode(RealmMap.KeyCount).ReceptorsFirst;
+        var receptorsFirst = Skin.SkinJson.GetKeymode((Ruleset.PlayableMode as KeysPlayableGameMode)!.KeyCount).ReceptorsFirst;
 
         AddRangeInternal([
             new LaneSwitchAlert(),
@@ -85,7 +88,7 @@ public partial class KeysPlayfield : Playfield
             new KeyOverlay()
         ]);
 
-        MapEvents.TimeOffsetEvents.ForEach(e => e.Apply(Objects));
+        Map.ObjectsOfType<TimeOffsetEvent>().ForEach(x => x.Apply(Objects));
     }
 
     protected override void Update()

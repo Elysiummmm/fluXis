@@ -6,6 +6,6 @@ namespace fluXis.Screens.Gameplay.Capabilities.Bases;
 
 public interface IMapCapability : IGameplayCapability
 {
-    MapInfo? Load() => null;
-    void Modify(MapInfo map) { }
+    PlayableMap? Load() => null;
+    void Modify(PlayableMap map) { }
 }

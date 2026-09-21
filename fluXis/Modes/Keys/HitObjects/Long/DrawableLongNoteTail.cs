@@ -1,3 +1,4 @@
+/*
 using fluXis.Map.Structures;
 using fluXis.Scoring;
 using osu.Framework.Allocation;
@@ -21,3 +22,4 @@ public partial class DrawableLongNoteTail : DrawableLongNotePart
         InternalChild = Skin.GetLongNoteEnd(VisualLane, ObjectManager.KeyCount).With(d => d.RelativeSizeAxes = Axes.X);
     }
 }
+*/

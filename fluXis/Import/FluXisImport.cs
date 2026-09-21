@@ -5,7 +5,7 @@ using System.IO.Compression;
 using System.Linq;
 using fluXis.Database;
 using fluXis.Database.Maps;
-using fluXis.Map;
+using fluXis.Map.Format.Legacy;
 using fluXis.Overlay.Notifications;
 using fluXis.Overlay.Notifications.Tasks;
 using fluXis.Utils;
@@ -192,7 +192,7 @@ public class FluXisImport : MapImporter
             if (filename.EndsWith(".fsc"))
             {
                 var json = new StreamReader(entry.Open()).ReadToEnd();
-                var mapInfo = json.Deserialize<MapInfo>();
+                var mapInfo = json.Deserialize<LegacyMapJson>();
 
                 if (!audioHashes.TryGetValue(mapInfo.AudioFile, out var audioHash))
                 {
@@ -272,7 +272,7 @@ public class FluXisImport : MapImporter
                 foreach (var switchEvent in events.LaneSwitchEvents)
                     map.KeyCount = Math.Max(map.KeyCount, switchEvent.Count);
 
-                map.Filters = MapUtils.GetMapFilters(mapInfo, events);
+                // map.Filters = MapUtils.GetMapFilters(mapInfo);
                 maps.Add(map);
 
                 if (!string.IsNullOrEmpty(mapInfo.CoverFile))

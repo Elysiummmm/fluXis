@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using fluXis.Audio;
 using fluXis.Graphics.Sprites.Icons;
 using fluXis.Graphics.UserInterface.Menus.Items;
-using fluXis.Map.Structures;
 using fluXis.Map.Structures.Bases;
+using fluXis.Modes.Keys.Map.Objects;
 using fluXis.Screens.Edit.Actions;
 using fluXis.Screens.Edit.Actions.Generic;
 using fluXis.Screens.Edit.Blueprints.Selection;
@@ -173,10 +173,10 @@ public partial class ChartingSelectionBlueprint : SelectionBlueprint<ITimedObjec
             return true;
         }
 
-        if (Object is not HitObject { Type: HitObjectType.Tick } h || e.Button != MouseButton.Middle)
+        if (Object is not Tick h || e.Button != MouseButton.Middle)
             return false;
 
-        h.HoldTime = h.HoldTime > 0 ? 0 : 1;
+        h.Small = !h.Small;
         return true;
     }
 

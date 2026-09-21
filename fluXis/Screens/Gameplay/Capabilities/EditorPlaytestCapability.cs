@@ -13,10 +13,10 @@ public class EditorPlaytestCapability : IMapCapability, IEndingCapability
     public GameplayScreen Screen { get; set; }
 
     private readonly EditorClock clock;
-    private readonly MapInfo map;
+    private readonly PlayableMap map;
     private readonly double startTime;
 
-    public EditorPlaytestCapability(EditorClock clock, MapInfo map, double startTime)
+    public EditorPlaytestCapability(EditorClock clock, PlayableMap map, double startTime)
     {
         this.clock = clock;
         this.map = map;
@@ -44,5 +44,5 @@ public class EditorPlaytestCapability : IMapCapability, IEndingCapability
         return null;
     }
 
-    MapInfo IMapCapability.Load() => map;
+    PlayableMap IMapCapability.Load() => map;
 }

@@ -61,7 +61,7 @@ public abstract partial class DrawableHitObject : CompositeDrawable
 public abstract partial class DrawableHitObject<T> : DrawableHitObject
     where T : HitObject
 {
-    public new HitObject Object => (T)base.Object;
+    public new T Object => (T)base.Object;
 
     protected DrawableHitObject(T o)
         : base(o)

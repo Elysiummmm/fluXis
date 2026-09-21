@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using fluXis.Database;
-using fluXis.Map;
+using fluXis.Map.Structures;
 using fluXis.Storyboards;
 using fluXis.Storyboards.Drawables;
 using Midori.Utils;
@@ -15,23 +15,20 @@ public class UnusedAssetsCheck : IVerifyCheck
     public IEnumerable<VerifyIssue> Check(IVerifyContext ctx)
     {
         var set = ctx.MapSet;
-        var infos = set.Maps.Select(x => x.GetMapInfo())
+        var infos = set.Maps.Select(x => x.GetPlayable(ctx.Modes))
                        .Where(x => x != null).ToList();
 
-        var storyboards = infos
-                          .Select<MapInfo, (MapInfo map, Storyboard storyboard)>(x => (x, x.GetStoryboard()))
-                          .Where(x => x.storyboard != null).ToList();
-
+        var withStoryboards = infos.Where(x => x.Storyboard != null).ToList();
         var storyboardFiles = new HashSet<string>();
 
-        foreach (var sb in storyboards)
+        foreach (var map in withStoryboards)
         {
             var root = set.GetPathForFile("");
             if (!Path.IsPathRooted(root)) root = MapFiles.GetFullPath(root);
             root = Path.TrimEndingDirectorySeparator(root);
 
-            var storyboard = sb.storyboard.JsonCopy();
-            var draw = new DrawableStoryboard(sb.map, storyboard, root);
+            var storyboard = map.Storyboard.JsonCopy();
+            var draw = new DrawableStoryboard(map, storyboard, root);
             ctx.LoadComponent(draw);
 
             foreach (var element in storyboard.Elements)
@@ -82,12 +79,13 @@ public class UnusedAssetsCheck : IVerifyCheck
                 exists |= info.BackgroundFile == relative;
                 exists |= info.AudioFile == relative;
                 exists |= info.VideoFile == relative;
-                exists |= info.EffectFile == relative;
                 exists |= info.CoverFile == relative;
-                exists |= info.StoryboardFile == relative;
 
-                foreach (var hitObject in info.HitObjects)
-                    exists |= hitObject.HitSound == relative;
+                foreach (var hitObject in info.ObjectsOfType<HitObject>())
+                    exists |= hitObject.Sample == relative;
+
+                foreach (var (_, v) in info.ImportPaths)
+                    exists |= v == relative;
             }
 
             exists |= storyboardFiles.Any(x => string.Equals(Path.ChangeExtension(x, null), Path.ChangeExtension(relative, null), StringComparison.OrdinalIgnoreCase));

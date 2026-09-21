@@ -16,13 +16,13 @@ public class NoteHitsoundChangeAction : EditorAction
         this.infos = infos;
         this.newSample = newSample;
 
-        samples = infos.Select(i => i.HitSound).ToArray();
+        samples = infos.Select(i => i.Sample).ToArray();
     }
 
     public override void Run(EditorMap map)
     {
         foreach (var info in infos)
-            info.HitSound = newSample;
+            info.Sample = newSample;
 
         map.UpdateHitSounds();
     }
@@ -30,7 +30,7 @@ public class NoteHitsoundChangeAction : EditorAction
     public override void Undo(EditorMap map)
     {
         for (int i = 0; i < infos.Length; i++)
-            infos[i].HitSound = samples[i];
+            infos[i].Sample = samples[i];
 
         map.UpdateHitSounds();
     }

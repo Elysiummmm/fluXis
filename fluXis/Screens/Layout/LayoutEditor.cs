@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using fluXis.Audio;
 using fluXis.Configuration;
-using fluXis.Database.Maps;
 using fluXis.Graphics;
 using fluXis.Graphics.Containers;
 using fluXis.Graphics.Sprites.Icons;
@@ -17,7 +15,6 @@ using fluXis.Graphics.UserInterface.Panel.Presets;
 using fluXis.Input;
 using fluXis.Map;
 using fluXis.Map.Drawables;
-using fluXis.Map.Structures;
 using fluXis.Modes;
 using fluXis.Mods;
 using fluXis.Overlay.Notifications;
@@ -119,7 +116,7 @@ public partial class LayoutEditor : FluXisScreen, IHUDDependencyProvider, IKeyBi
             RelativeSizeAxes = Axes.Both,
             Children = new Drawable[]
             {
-                dependencies.CacheAsAndReturn(new Hitsounding(maps.CurrentMapSet, new List<HitSoundFade>(), clock.RateBindable.GetBoundCopy())),
+                dependencies.CacheAsAndReturn(new Hitsounding(maps.CurrentMapSet, [], clock.RateBindable.GetBoundCopy())),
                 new Box
                 {
                     RelativeSizeAxes = Axes.Both,
@@ -216,7 +213,7 @@ public partial class LayoutEditor : FluXisScreen, IHUDDependencyProvider, IKeyBi
             try
             {
                 var rm = maps.CurrentMap;
-                var map = rm.GetMapInfo();
+                var map = rm.GetPlayable(Game.GameModes);
 
                 string reason = "";
 
@@ -225,11 +222,10 @@ public partial class LayoutEditor : FluXisScreen, IHUDDependencyProvider, IKeyBi
 
                 var auto = new AutoGenerator(map, rm.KeyCount);
                 var replay = auto.Generate();
-                var events = map.GetMapEvents();
 
                 Schedule(() => LoadComponentAsync(ruleset = new ReplayRulesetContainer(
-                    Game.GameModes.Find(map.GameMode) ?? throw GameModeManager.FailedToLoadException(),
-                    replay, map, events, [new AutoPlayMod()]
+                    Game.GameModes.Find(map.Mode) ?? throw GameModeManager.FailedToLoadException(),
+                    replay, map, [new AutoPlayMod()]
                 ) { ParentClock = clock }, c =>
                 {
                     rulesetWrapper.Add(c);
@@ -339,8 +335,7 @@ public partial class LayoutEditor : FluXisScreen, IHUDDependencyProvider, IKeyBi
     HealthProcessor IHUDDependencyProvider.HealthProcessor => ruleset.PlayableMode.FirstPlayer.HealthProcessor;
     ScoreProcessor IHUDDependencyProvider.ScoreProcessor => ruleset.PlayableMode.FirstPlayer.ScoreProcessor;
     HitWindows IHUDDependencyProvider.HitWindows => ruleset.HitWindows;
-    RealmMap IHUDDependencyProvider.RealmMap => ruleset.MapInfo.RealmEntry;
-    MapInfo IHUDDependencyProvider.MapInfo => ruleset.MapInfo;
+    PlayableMap IHUDDependencyProvider.Map => ruleset.Map;
     float IHUDDependencyProvider.PlaybackRate => ruleset.Rate;
     double IHUDDependencyProvider.CurrentTime => ruleset.CurrentTime;
 

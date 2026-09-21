@@ -4,6 +4,7 @@ using fluXis.Database.Maps;
 using fluXis.Graphics.Sprites.Icons;
 using fluXis.Graphics.UserInterface.Color;
 using fluXis.Map;
+using fluXis.Modes;
 using osu.Framework.Allocation;
 using osu.Framework.Audio.Sample;
 using osu.Framework.Bindables;
@@ -19,6 +20,9 @@ namespace fluXis.Screens.Select.Footer.Practice;
 
 public partial class FooterPracticeRangeController : Container
 {
+    [Resolved]
+    private GameModeManager modes { get; set; }
+
     [Resolved]
     private MapStore maps { get; set; }
 
@@ -149,16 +153,8 @@ public partial class FooterPracticeRangeController : Container
 
     private void mapChanged(ValueChangedEvent<RealmMap> v)
     {
-        var info = v.NewValue?.GetMapInfo();
-
-        if (info is null || info.HitObjects.Count == 0)
-        {
-            endTime = 1;
-        }
-        else
-        {
-            endTime = (int)info.EndTime;
-        }
+        var info = v.NewValue?.GetPlayable(modes);
+        endTime = (int)(info?.EndTime ?? 1000);
 
         start.Value = 0;
         end.Value = (int)(endTime / 1000f);

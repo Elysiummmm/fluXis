@@ -1,5 +1,4 @@
 using fluXis.Input;
-using fluXis.Map.Structures;
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Framework.Input.Bindings;
@@ -9,11 +8,11 @@ namespace fluXis.Modes.Keys.Map.Objects.Drawable;
 
 #nullable enable
 
-public partial class DrawableNote : DrawableKeysHitObject<HitObject>, IKeyBindingHandler<FluXisGameplayKeybind>
+public partial class DrawableNote : DrawableKeysHitObject<Note>, IKeyBindingHandler<FluXisGameplayKeybind>
 {
     public override bool CanBeRemoved => Judged || Time.Current - Object.Time > HitWindows.TimingFor(HitWindows.LowestHitable);
 
-    public DrawableNote(HitObject o)
+    public DrawableNote(Note o)
         : base(o)
     {
     }

@@ -28,7 +28,7 @@ public class ObjectReSnapAction : EditorAction
     {
         foreach (var note in objs)
         {
-            var tp = map.MapInfo.GetTimingPoint(note.Time);
+            var tp = map.Playable.GetTimingPoint(note.Time);
             float increase = tp.Signature * tp.MsPerBeat / (4 * snapDivisor);
 
             var lower = snapTime(note.Time);

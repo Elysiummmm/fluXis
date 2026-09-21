@@ -30,7 +30,7 @@ public partial class StoryboardAnimationEntry : CompositeDrawable, IHasPopover
     private StoryboardTimeline timeline { get; set; }
 
     private double startTime => row.Item.StartTime + Animation.StartTime;
-    private float beatLength => map.MapInfo.GetTimingPoint(startTime).MsPerBeat;
+    private float beatLength => map.Playable.GetTimingPoint(startTime).MsPerBeat;
 
     private BindableBool isSelected = new(false);
 

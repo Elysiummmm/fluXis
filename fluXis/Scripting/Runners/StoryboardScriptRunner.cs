@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using fluXis.Audio.FFT;
 using fluXis.Graphics;
 using fluXis.Map;
-using fluXis.Map.Structures;
 using fluXis.Scripting.Attributes;
 using fluXis.Scripting.Models;
 using fluXis.Scripting.Models.Skinning;
@@ -31,7 +30,7 @@ public class StoryboardScriptRunner : ScriptRunner, IHasLoadedValue
     public LuaVector2 ScreenResolution { get; }
 
     public StoryboardScriptRunner(
-        MapInfo map, [CanBeNull] AudioAnalyzer audioAnalyzer,
+        PlayableMap map, [CanBeNull] AudioAnalyzer audioAnalyzer,
         Storyboard storyboard,
         LuaSettings settings,
         ISkin skin,
@@ -56,7 +55,7 @@ public class StoryboardScriptRunner : ScriptRunner, IHasLoadedValue
         AddFunction("Layer", (string input) => Enum.TryParse(input, out StoryboardLayer layer) ? layer : StoryboardLayer.Background);
         AddFunction("Anchor", (string str) => Enum.TryParse(str, out Anchor anchor) ? anchor : Anchor.TopLeft);
         AddFunction("BlendMode", (string str) => Enum.TryParse(str, out DefaultBlendingParameters blendMode) ? blendMode : DefaultBlendingParameters.Mix);
-        AddFunction("HitObjectType", (string str) => Enum.TryParse(str, out HitObjectType hitType) ? hitType : HitObjectType.Normal);
+        // AddFunction("HitObjectType", (string str) => Enum.TryParse(str, out HitObjectType hitType) ? hitType : HitObjectType.Normal);
 
         // elements
         AddFunction("StoryboardBox", newBox);

@@ -8,6 +8,7 @@ using fluXis.Graphics.UserInterface.Panel;
 using fluXis.Graphics.UserInterface.Panel.Presets;
 using fluXis.Map.Structures;
 using fluXis.Map.Structures.Bases;
+using fluXis.Modes.Keys.Map.Objects;
 using fluXis.Overlay.Notifications;
 using fluXis.Screens.Edit.Actions.Events;
 using fluXis.Screens.Edit.Actions.Generic;
@@ -299,17 +300,17 @@ public partial class ChartingContainer : EditorTabContainer, IKeyBindingHandler<
         var time = EditorClock.CurrentTime;
         var snapped = snaps.SnapTime(time);
 
-        var tp = Map.MapInfo.GetTimingPoint(time);
+        var tp = Map.Playable.GetTimingPoint(time);
         var increase = tp.Signature * tp.MsPerBeat / (4 * settings.SnapDivisor);
         var next = snaps.SnapTime(time + increase);
 
         // take the closest snap
         time = Math.Abs(time - snapped) < Math.Abs(time - next) ? snapped : next;
 
-        var note = new HitObject
+        var note = new Note
         {
             Time = time,
-            HitSound = CurrentHitSound.Value,
+            Sample = CurrentHitSound.Value,
             Lane = lane
         };
 
@@ -345,7 +346,7 @@ public partial class ChartingContainer : EditorTabContainer, IKeyBindingHandler<
 
             case EditorKeybinding.AddTiming:
             {
-                var current = Map.MapInfo.GetTimingPoint(EditorClock.CurrentTime);
+                var current = Map.Playable.GetTimingPoint(EditorClock.CurrentTime);
 
                 var point = new TimingPoint
                 {
@@ -448,7 +449,7 @@ public partial class ChartingContainer : EditorTabContainer, IKeyBindingHandler<
 
         var start = objects.MinBy(x => x.Time).Time;
         var end = objects.MaxBy(x => x.Time).Time;
-        end += Map.MapInfo.GetTimingPoint(end).MsPerBeat;
+        end += Map.Playable.GetTimingPoint(end).MsPerBeat;
 
         var snapped = snaps.SnapTime(end, 1);
 

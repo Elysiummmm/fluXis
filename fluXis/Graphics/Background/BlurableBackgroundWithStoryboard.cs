@@ -5,9 +5,12 @@ using fluXis.Configuration;
 using fluXis.Database.Maps;
 using fluXis.Graphics.Shaders;
 using fluXis.Map.Drawables;
+using fluXis.Map.Structures.Events;
+using fluXis.Modes;
 using fluXis.Storyboards;
 using fluXis.Storyboards.Drawables;
 using JetBrains.Annotations;
+using osu.Framework.Allocation;
 using osu.Framework.Extensions.IEnumerableExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
@@ -18,6 +21,9 @@ namespace fluXis.Graphics.Background;
 
 public partial class BlurableBackgroundWithStoryboard : BlurableBackground
 {
+    [Resolved]
+    private GameModeManager modes { get; set; }
+
     [CanBeNull]
     private Video video;
 
@@ -28,7 +34,7 @@ public partial class BlurableBackgroundWithStoryboard : BlurableBackground
 
     protected override IEnumerable<Drawable> CreateContent()
     {
-        var info = Map?.GetMapInfo();
+        var map = Map?.GetPlayable(modes);
         MapBackground background = null;
 
         foreach (var drawable in base.CreateContent())
@@ -37,15 +43,14 @@ public partial class BlurableBackgroundWithStoryboard : BlurableBackground
             yield return drawable;
         }
 
-        if (info is null)
+        if (map is null)
             yield break;
 
         var framed = new FramedClock(GlobalClock.CurrentTrack, false);
 
-        var effects = info.GetMapEvents([], true);
-        var shaders = effects.ShaderEvents;
+        var shaders = map.ObjectsOfType<ShaderEvent>();
 
-        if (shaders.Count != 0 && Config.Get<bool>(FluXisSetting.ShowBackgroundShaders))
+        if (shaders.Length != 0 && Config.Get<bool>(FluXisSetting.ShowBackgroundShaders))
         {
             var grouped = shaders.GroupBy(x => x.Type);
 
@@ -70,7 +75,7 @@ public partial class BlurableBackgroundWithStoryboard : BlurableBackground
             AddInternal(handlers);
         }
 
-        var stream = info.GetVideoStream();
+        var stream = map.Storage.GetStream(map.VideoFile);
 
         if (stream != null)
         {
@@ -86,7 +91,7 @@ public partial class BlurableBackgroundWithStoryboard : BlurableBackground
             };
         }
 
-        var storyboard = info.CreateDrawableStoryboard();
+        var storyboard = map.Storyboard?.CreateDrawable(map, map.Storage);
 
         if (storyboard != null)
         {

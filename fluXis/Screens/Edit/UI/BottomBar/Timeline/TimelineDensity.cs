@@ -76,8 +76,8 @@ public partial class TimelineDensity : FillFlowContainer
             var start = sectionLength * i;
             var end = start + sectionLength;
 
-            var objects = map.MapInfo.HitObjects.Where(h => h.Time >= start && h.Time < end);
-            counts[i] = objects.Sum(getValue);
+            var objects = map.Playable.ObjectsOfType<HitObject>().Where(h => h.Time >= start && h.Time < end);
+            counts[i] = objects.Sum(x => x.DensityContribution);
         }
 
         var highest = counts.Max();
@@ -89,13 +89,6 @@ public partial class TimelineDensity : FillFlowContainer
             box.Alpha = percentages[i];
         }
     }
-
-    private float getValue(HitObject hit) => hit.Type switch
-    {
-        HitObjectType.Tick => .1f,
-        HitObjectType.Landmine => 0f,
-        _ => 1f
-    };
 
     protected override bool OnHover(HoverEvent e)
     {

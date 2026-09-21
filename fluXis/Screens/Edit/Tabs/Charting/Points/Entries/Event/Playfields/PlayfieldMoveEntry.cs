@@ -81,7 +81,7 @@ public partial class PlayfieldMoveEntry : PointListEntry
                 TooltipText = "The player to apply this to.",
                 CurrentValue = move.PlayfieldIndex,
                 Min = 0,
-                Max = Map.MapInfo.IsDual ? 2 : 0,
+                Max = Map.Playable.IsDual ? 2 : 0,
                 Step = 1,
                 OnValueChanged = value =>
                 {
@@ -95,7 +95,7 @@ public partial class PlayfieldMoveEntry : PointListEntry
                 TooltipText = "The subfield to apply this to.",
                 CurrentValue = move.PlayfieldSubIndex,
                 Min = 0,
-                Max = Map.MapInfo.ExtraPlayfields + 1,
+                Max = Map.Playable.ExtraPlayfields + 1,
                 Step = 1,
                 OnValueChanged = value =>
                 {

@@ -8,7 +8,7 @@ public class AudioExistsCheck : IVerifyCheck
 {
     public IEnumerable<VerifyIssue> Check(IVerifyContext ctx)
     {
-        var path = ctx.MapSet.GetPathForFile(ctx.MapInfo.AudioFile);
+        var path = ctx.MapSet.GetPathForFile(ctx.Map.AudioFile);
         path = MapFiles.GetFullPath(path);
 
         if (string.IsNullOrEmpty(path))

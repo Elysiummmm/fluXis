@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using fluXis.Map.Structures.Events;
 
 namespace fluXis.Screens.Edit.Tabs.Verify.Checks.Effects;
 
@@ -12,7 +13,7 @@ public class UnevenInEvenCountCheck : IVerifyCheck
         if (count % 2 != 0)
             yield break;
 
-        foreach (var switchEvent in ctx.MapEvents.LaneSwitchEvents)
+        foreach (var switchEvent in ctx.Map.ObjectsOfType<LaneSwitchEvent>())
         {
             // skip if the is even
             if (switchEvent.Count % 2 == 0)

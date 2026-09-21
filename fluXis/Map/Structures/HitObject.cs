@@ -1,106 +1,33 @@
 using fluXis.Map.Structures.Bases;
-using fluXis.Scoring.Structs;
 using fluXis.Screens.Gameplay.Ruleset;
-using JetBrains.Annotations;
-using Newtonsoft.Json;
-using osu.Framework.Graphics;
+using YamlDotNet.Serialization;
 
 namespace fluXis.Map.Structures;
 
-public class HitObject : ITimedObject, IHasDuration
+#nullable enable
+
+public abstract class HitObject : ITimedObject
 {
-    #region Stored
+    [YamlIgnore]
+    public virtual int ComboContribution => 1;
 
-    [JsonProperty("time")]
+    [YamlIgnore]
+    public virtual float DensityContribution => 1;
+
     public double Time { get; set; }
-
-    [JsonProperty("lane")]
     public int Lane { get; set; }
-
-    /// <summary>
-    /// the visual position of the note. (only applies to tick notes)
-    /// </summary>
-    [JsonProperty("visual-lane", DefaultValueHandling = DefaultValueHandling.Ignore)]
-    public float VisualLane { get; set; }
-
-    [JsonProperty("holdtime", DefaultValueHandling = DefaultValueHandling.Ignore)]
-    public double HoldTime { get; set; }
-
-    [JsonProperty("hitsound")]
-    public string HitSound { get; set; }
-
-    [JsonProperty("group", DefaultValueHandling = DefaultValueHandling.Ignore)]
-    public string Group { get; set; }
-
-    [JsonProperty("hidden")]
-    public bool Hidden { get; set; }
-
-    [JsonProperty("type")]
-    public HitObjectType Type { get; set; }
-
-    #endregion
-
-    #region Runtime
+    public string Group { get; set; } = string.Empty;
+    public string Sample { get; set; } = string.Empty;
 
     /// <summary>
     /// The next HitObject in the same lane.
     /// </summary>
-    [CanBeNull]
-    [JsonIgnore]
-    public HitObject NextObject { get; set; }
+    [YamlIgnore]
+    public HitObject? NextObject { get; set; }
 
     /// <summary>
     /// The scroll group for this object.
     /// </summary>
-    [CanBeNull]
-    [JsonIgnore]
-    public ScrollGroup ScrollGroup { get; set; }
-
-    #endregion
-
-    [JsonIgnore]
-    public bool LongNote => HoldTime > 0 && Type == HitObjectType.Normal;
-
-    [JsonIgnore]
-    public bool Landmine => Type == HitObjectType.Landmine;
-
-    [JsonIgnore]
-    public double EndTime
-    {
-        get
-        {
-            if (HoldTime <= 0)
-                return Time;
-
-            return Time + HoldTime;
-        }
-        set => HoldTime = value - Time;
-    }
-
-    [JsonIgnore]
-    public HitResult? Result { get; set; }
-
-    [JsonIgnore]
-    public HitResult? HoldEndResult { get; set; }
-
-    /// <summary>
-    /// The ease type the start of this note has.
-    /// </summary>
-    [JsonIgnore]
-    public Easing StartEasing { get; set; } = Easing.None;
-
-    /// <summary>
-    /// The ease type the end of this note has.
-    /// </summary>
-    [JsonIgnore]
-    public Easing EndEasing { get; set; } = Easing.None;
-
-    double IHasDuration.Duration { get => HoldTime; set => HoldTime = value; }
-}
-
-public enum HitObjectType
-{
-    Normal,
-    Tick,
-    Landmine
+    [YamlIgnore]
+    public ScrollGroup? ScrollGroup { get; set; }
 }

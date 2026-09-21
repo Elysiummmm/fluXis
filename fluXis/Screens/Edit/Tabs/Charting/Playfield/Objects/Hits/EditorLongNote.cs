@@ -1,23 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
-using fluXis.Map.Structures;
+using fluXis.Map.Structures.Bases;
+using fluXis.Modes.Keys.Map.Objects;
 using fluXis.Skinning.Bases;
 using fluXis.Skinning.Default.HitObject;
 using osu.Framework.Graphics;
 
 namespace fluXis.Screens.Edit.Tabs.Charting.Playfield.Objects.Hits;
 
-public partial class EditorLongNote : EditorDrawableHitObject
+public partial class EditorLongNote : EditorDrawableHitObject<LongNote>
 {
     public override bool Visible
     {
         get
         {
-            var inbound = EditorClock.CurrentTime >= Data.Time && EditorClock.CurrentTime <= Data.EndTime;
+            var inbound = EditorClock.CurrentTime >= Data.Time && EditorClock.CurrentTime <= Data.GetEndTime();
             if (inbound) return true;
 
             var start = base.Visible;
-            var end = Math.Abs(EditorClock.CurrentTime - Data.EndTime) <= 2000;
+            var end = Math.Abs(EditorClock.CurrentTime - Data.GetEndTime()) <= 2000;
 
             return start || end;
         }
@@ -27,7 +28,7 @@ public partial class EditorLongNote : EditorDrawableHitObject
     private Drawable body;
     public Drawable End { get; private set; }
 
-    public EditorLongNote(HitObject hit)
+    public EditorLongNote(LongNote hit)
         : base(hit)
     {
     }
@@ -67,7 +68,7 @@ public partial class EditorLongNote : EditorDrawableHitObject
     {
         base.Update();
 
-        var endY = Playfield.HitObjectContainer.PositionAtTime(Data.EndTime);
+        var endY = Playfield.HitObjectContainer.PositionAtTime(Data.GetEndTime());
         body.Height = Y - endY;
         body.Y = -(End.Height / 2f);
         End.Y = endY - Y;

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using fluXis.Graphics.UserInterface.Color;
+using fluXis.Map;
 using fluXis.Map.Structures;
 using fluXis.Map.Structures.Bases;
 using fluXis.Map.Structures.Events;
@@ -23,18 +24,21 @@ public partial class ChartingPointsList : PointsList
 {
     protected override void RegisterEvents()
     {
-        RegisterTypeEvents(Map.MapInfo.TimingPoints);
-        RegisterTypeEvents(Map.MapInfo.ScrollVelocities);
+        RegisterTypeEvents(Map.Playable.ObjectsOfType<TimingPoint>());
+        RegisterTypeEvents(Map.Playable.ObjectsOfType<ScrollVelocity>());
 
-        foreach (var (type, list) in Map.MapEvents.GetListsForTypes())
+        foreach (var type in IMapEvent.GetAllTypes())
         {
+            var listMethod = Map.Playable.GetType().GetRuntimeMethod(nameof(PlayableMap.ObjectsOfType), [])!.MakeGenericMethod(type);
+            var list = listMethod.Invoke(Map.Playable, []);
+
             var method = GetType().GetMethod(nameof(registerEffect), BindingFlags.Instance | BindingFlags.NonPublic)!;
             method = method.MakeGenericMethod(type);
             method.Invoke(this, [list]);
         }
     }
 
-    private void registerEffect<T>(List<T> list)
+    private void registerEffect<T>(T[] list)
         where T : class, ITimedObject
         => RegisterTypeEvents(list);
 

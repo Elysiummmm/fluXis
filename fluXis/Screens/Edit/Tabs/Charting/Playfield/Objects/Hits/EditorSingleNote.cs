@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using fluXis.Map.Structures;
+using fluXis.Modes.Keys.Map.Objects;
 using fluXis.Skinning.Bases;
 using fluXis.Skinning.Default.HitObject;
 using osu.Framework.Extensions.IEnumerableExtensions;
@@ -7,11 +7,11 @@ using osu.Framework.Graphics;
 
 namespace fluXis.Screens.Edit.Tabs.Charting.Playfield.Objects.Hits;
 
-public partial class EditorSingleNote : EditorDrawableHitObject
+public partial class EditorSingleNote : EditorDrawableHitObject<Note>
 {
     private Drawable piece;
 
-    public EditorSingleNote(HitObject hit)
+    public EditorSingleNote(Note hit)
         : base(hit)
     {
     }

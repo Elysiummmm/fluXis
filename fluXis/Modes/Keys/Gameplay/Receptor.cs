@@ -17,6 +17,9 @@ public partial class Receptor : CompositeDrawable
     private RulesetContainer ruleset { get; set; }
 
     [Resolved]
+    private KeysKeybindContainer keybinds { get; set; }
+
+    [Resolved]
     private Playfield playfield { get; set; }
 
     [Resolved]
@@ -45,14 +48,14 @@ public partial class Receptor : CompositeDrawable
 
         InternalChildren = new[]
         {
-            up = skin.GetReceptor(idx + 1, playfield.RealmMap.KeyCount, false),
-            down = skin.GetReceptor(idx + 1, playfield.RealmMap.KeyCount, true),
-            hitLighting = skin.GetColumnLighting(idx + 1, playfield.RealmMap.KeyCount).With(l => l.AlwaysPresent = true)
+            up = skin.GetReceptor(idx + 1, (ruleset.PlayableMode as KeysPlayableGameMode)!.KeyCount, false),
+            down = skin.GetReceptor(idx + 1, (ruleset.PlayableMode as KeysPlayableGameMode)!.KeyCount, true),
+            hitLighting = skin.GetColumnLighting(idx + 1, (ruleset.PlayableMode as KeysPlayableGameMode)!.KeyCount).With(l => l.AlwaysPresent = true)
         };
 
         hitLighting.Margin = new MarginPadding
         {
-            Bottom = skin.SkinJson.GetKeymode(playfield.RealmMap.KeyCount).HitPosition
+            Bottom = skin.SkinJson.GetKeymode((ruleset.PlayableMode as KeysPlayableGameMode)!.KeyCount).HitPosition
         };
     }
 
@@ -84,9 +87,9 @@ public partial class Receptor : CompositeDrawable
         var i = idx;
 
         if (playfield.PlayerIndex > 0)
-            i += playfield.RealmMap.KeyCount;
+            i += (ruleset.PlayableMode as KeysPlayableGameMode)!.KeyCount;
 
-        isDown.Value = ruleset.Input.Pressed[i];
+        isDown.Value = keybinds.PressedActions.Contains(keybinds.Keys[i]);
         Width = laneSwitchManager.WidthFor(idx + 1);
     }
 }

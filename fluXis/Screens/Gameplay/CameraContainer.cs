@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
-using fluXis.Map.Structures.Bases;
+﻿using fluXis.Map.Structures.Bases;
 using osu.Framework.Allocation;
+using osu.Framework.Extensions.IEnumerableExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 
@@ -11,9 +11,9 @@ public partial class CameraContainer : Container
     protected override bool RequiresChildrenUpdate => true;
 
     private Drawable proxy;
-    private readonly List<ICameraEvent> events;
+    private readonly ICameraEvent[] events;
 
-    public CameraContainer(List<ICameraEvent> events)
+    public CameraContainer(ICameraEvent[] events)
     {
         this.events = events;
 
@@ -38,7 +38,7 @@ public partial class CameraContainer : Container
 
     public Drawable CreateProxyDrawable() => proxy = new CameraProxy();
 
-    public void Refresh(List<ICameraEvent> ev)
+    public void Refresh(ICameraEvent[] ev)
     {
         proxy.ClearTransforms(true);
 

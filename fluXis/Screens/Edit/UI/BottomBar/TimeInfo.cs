@@ -79,7 +79,7 @@ public partial class TimeInfo : CompositeDrawable, IHasTooltip
     protected override void Update()
     {
         timeText.Text = TimeUtils.Format(clock.CurrentTime);
-        bpmText.Text = $"{map.MapInfo.GetTimingPoint((float)clock.CurrentTime)?.BPM} BPM";
+        bpmText.Text = $"{map.Playable.GetTimingPoint((float)clock.CurrentTime)?.BPM} BPM";
     }
 
     protected override bool OnHover(HoverEvent e)

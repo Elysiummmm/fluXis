@@ -1,3 +1,4 @@
+/*
 using System;
 using System.Collections.Generic;
 using fluXis.Map.Structures;
@@ -113,3 +114,4 @@ public partial class DrawableLongNotePart : CompositeDrawable
         OnJudgement?.Invoke(offset);
     }
 }
+*/

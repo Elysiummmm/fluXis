@@ -1,5 +1,7 @@
 using System;
 using System.Linq;
+using fluXis.Map.Structures;
+using fluXis.Modes.Keys.Map.Objects;
 using fluXis.Screens.Edit.Tabs.Charting.Playfield;
 using osu.Framework.Graphics;
 using osu.Framework.Input.Events;
@@ -7,7 +9,7 @@ using osuTK.Input;
 
 namespace fluXis.Screens.Edit.Tabs.Charting.Blueprints.Placement;
 
-public partial class SingleNotePlacementBlueprint : NotePlacementBlueprint
+public partial class SingleNotePlacementBlueprint : NotePlacementBlueprint<Note>
 {
     public override bool AllowPainting => true;
 
@@ -43,7 +45,7 @@ public partial class SingleNotePlacementBlueprint : NotePlacementBlueprint
 
     protected override void OnPlacementFinished(bool commit)
     {
-        if (Map.MapInfo.HitObjects.Where(x => x.Lane == Hit.Lane).Any(x => Math.Abs(x.Time - Hit.Time) < 10))
+        if (Map.Playable.ObjectsOfType<HitObject>().Where(x => x.Lane == Hit.Lane).Any(x => Math.Abs(x.Time - Hit.Time) < 10))
             return;
 
         base.OnPlacementFinished(commit);

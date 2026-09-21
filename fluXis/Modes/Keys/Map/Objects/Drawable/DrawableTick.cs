@@ -1,6 +1,5 @@
 using System;
 using fluXis.Input;
-using fluXis.Map.Structures;
 using fluXis.Scoring.Enums;
 using fluXis.Utils.Extensions;
 using osu.Framework.Allocation;
@@ -12,7 +11,7 @@ namespace fluXis.Modes.Keys.Map.Objects.Drawable;
 
 #nullable enable
 
-public partial class DrawableTick : DrawableKeysHitObject<HitObject>, IKeyBindingHandler<FluXisGameplayKeybind>
+public partial class DrawableTick : DrawableKeysHitObject<Tick>, IKeyBindingHandler<FluXisGameplayKeybind>
 {
     public override bool CanBeRemoved => Judged || wouldMiss;
     private bool wouldMiss => Time.Current - Object.Time > HitWindows.TimingFor(HitWindows.LowestHitable);
@@ -23,7 +22,7 @@ public partial class DrawableTick : DrawableKeysHitObject<HitObject>, IKeyBindin
     private bool directHit = false;
     private double? holdStartTime;
 
-    public DrawableTick(HitObject o)
+    public DrawableTick(Tick o)
         : base(o)
     {
     }
@@ -31,7 +30,7 @@ public partial class DrawableTick : DrawableKeysHitObject<HitObject>, IKeyBindin
     [BackgroundDependencyLoader]
     private void load()
     {
-        InternalChild = Skin.GetTickNote(PlayerLane, Manager.KeyCount, Object.HoldTime > 0).WithRelativeSize(Axes.X);
+        InternalChild = Skin.GetTickNote(PlayerLane, Manager.KeyCount, Object.Small).WithRelativeSize(Axes.X);
         actionIndex = Array.IndexOf(Keybinds.Keys, Action);
     }
 

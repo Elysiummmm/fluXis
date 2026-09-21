@@ -5,10 +5,13 @@ using fluXis.Screens.Edit.Tabs.Charting.Playfield;
 using Newtonsoft.Json;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using rhym;
+using YamlDotNet.Serialization;
 
-namespace fluXis.Map.Structures;
+namespace fluXis.Map.Structures.Events;
 
-public class HitSoundFade : ITimedObject
+[ResourceLocation("flux:events/soundfade")]
+public class HitSoundFade : IMapEvent
 {
     /// <summary>
     /// The time at which the volume change should start.
@@ -43,7 +46,7 @@ public class HitSoundFade : ITimedObject
     [JsonProperty("ease")]
     public Easing Easing { get; set; }
 
-    [JsonIgnore]
+    [JsonIgnore, YamlIgnore]
     string ITimedObject.Group { get; set; }
 
     IEnumerable<Drawable> ITimedObject.CreateObjectOverlay(EditorDrawableObject obj)

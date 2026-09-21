@@ -6,6 +6,7 @@ using System.Reflection;
 using fluXis.Map;
 using fluXis.Map.Structures;
 using fluXis.Map.Structures.Bases;
+using fluXis.Map.Structures.Events;
 using fluXis.Scripting.Attributes;
 using fluXis.Utils.Extensions;
 using NLua;
@@ -23,15 +24,13 @@ public class LuaMap : ILuaModel
         lookup = types.ToDictionary(x => x.Name.Replace("Event", ""), x => x);
     }
 
-    private MapInfo map { get; }
-    private MapEvents events { get; }
+    private PlayableMap map { get; }
     private Lua lua { get; }
 
-    public LuaMap(MapInfo map, Lua lua = null)
+    public LuaMap(PlayableMap map, Lua lua = null)
     {
         this.map = map;
         this.lua = lua;
-        events = map.GetMapEvents();
     }
 
 #nullable enable
@@ -41,29 +40,29 @@ public class LuaMap : ILuaModel
     /// 'Normal' HitObjectType will also give long notes not just normal notes.
     /// </summary>
     [LuaMember(Name = "NotesInRange")]
-    public LuaTable GetNotesInRange(double startTime, double endTime, [LuaCustomType(typeof(HitObjectType?))] string? type = null)
+    public LuaTable GetNotesInRange(double startTime, double endTime, /*[LuaCustomType(typeof(HitObjectType?))]*/ string? type = null)
     {
-        HitObjectType? typeHit = Enum.TryParse<HitObjectType>(type, out var typeH) ? typeH : null;
+        if (type == "Normal") type = "Note";
 
-        return typeHit is null
-            ? getInRange(map.HitObjects, startTime, endTime).ToLuaTable(lua)
-            : getInRange(map.HitObjects, startTime, endTime)
-              .Where(h => h.Type == typeHit).ToLuaTable(lua);
+        return type is null
+            ? getInRange([.. map.ObjectsOfType<HitObject>()], startTime, endTime).ToLuaTable(lua)
+            : getInRange([.. map.ObjectsOfType<HitObject>()], startTime, endTime)
+              .Where(h => h.GetType().Name.Equals(type, StringComparison.InvariantCultureIgnoreCase)).ToLuaTable(lua);
     }
 
 #nullable restore
 
     [LuaMember(Name = "TimingPointsInRange")]
     public LuaTable GetTimingPointsInRange(double startTime, double endTime)
-        => getInRange(map.TimingPoints, startTime, endTime).ToLuaTable(lua);
+        => getInRange([.. map.ObjectsOfType<TimingPoint>()], startTime, endTime).ToLuaTable(lua);
 
     [LuaMember(Name = "ScrollVelocitiesInRange")]
     public LuaTable GetScrollVelocitiesInRange(double startTime, double endTime)
-        => getInRange(map.ScrollVelocities, startTime, endTime).ToLuaTable(lua);
+        => getInRange([.. map.ObjectsOfType<ScrollVelocity>()], startTime, endTime).ToLuaTable(lua);
 
     [LuaMember(Name = "HitSoundFadesInRange")]
     public LuaTable GetHitSoundFadesInRange(double startTime, double endTime)
-        => getInRange(map.HitSoundFades, startTime, endTime).ToLuaTable(lua);
+        => getInRange([.. map.ObjectsOfType<HitSoundFade>()], startTime, endTime).ToLuaTable(lua);
 
     [LuaMember(Name = "EventsInRange")]
     public LuaTable GetEventsInRange(double startTime, double endTime, [LuaCustomType(typeof(IMapEvent))] string eventType)
@@ -71,13 +70,10 @@ public class LuaMap : ILuaModel
         var type = lookup.GetValueOrDefault(eventType);
         if (type is null) return new List<object>().ToLuaTable(lua);
 
-        var prop = events.AllListProperties.FirstOrDefault(x => x.PropertyType.GenericTypeArguments.FirstOrDefault() == type);
-        if (prop is null) throw new InvalidOperationException("MapEvents does not have requested Type.");
-
-        var list = prop.GetValue(events) ?? throw new NullReferenceException();
+        var list = map.ObjectsOfType(type).ToList();
         var method = GetType().GetMethod(nameof(getInRange), BindingFlags.Static | BindingFlags.NonPublic);
         var gen = method!.MakeGenericMethod(type);
-        var result = gen.Invoke(null, new[] { list, startTime, endTime }) as IEnumerable;
+        var result = gen.Invoke(null, [list, startTime, endTime]) as IEnumerable;
         var table = result.ToLuaTable(lua);
         return table;
     }

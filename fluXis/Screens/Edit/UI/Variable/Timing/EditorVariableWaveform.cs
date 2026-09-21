@@ -85,7 +85,7 @@ public partial class EditorVariableWaveform : BufferedContainer
 
     private void recalculateRange()
     {
-        var next = map.MapInfo.TimingPoints
+        var next = map.Playable.ObjectsOfType<TimingPoint>()
                       .SkipWhile(g => g != point).Skip(1)
                       .FirstOrDefault();
 

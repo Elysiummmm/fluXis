@@ -8,11 +8,14 @@ using fluXis.Screens.Edit.Tabs.Charting.Playfield;
 using Newtonsoft.Json;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using rhym;
+using YamlDotNet.Serialization;
 
 namespace fluXis.Map.Structures.Events.Scrolling;
 
 [Description("Offsets the hit objects visually.")]
-public class TimeOffsetEvent : IMapEvent, IHasDuration, IHasEasing, IHasStartValue<double>, IApplicableToHitManager
+[ResourceLocation("flux:events/scroll/offset")]
+public class TimeOffsetEvent : IMapEvent, IHasDuration, IHasEasing, IHasStartValue<double>, IApplicableToHitManager, IScrollEvent
 {
     [JsonProperty("time")]
     public double Time { get; set; }
@@ -32,7 +35,7 @@ public class TimeOffsetEvent : IMapEvent, IHasDuration, IHasEasing, IHasStartVal
     [JsonProperty("start-offset")]
     public double StartOffset { get; set; }
 
-    [JsonIgnore]
+    [JsonIgnore, YamlIgnore]
     public double StartValue
     {
         get => StartOffset;

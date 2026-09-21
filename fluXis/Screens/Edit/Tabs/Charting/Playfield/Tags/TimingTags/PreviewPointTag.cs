@@ -25,7 +25,7 @@ public partial class PreviewPointTag : EditorTag
 
     protected override void Update()
     {
-        TimedObject.Time = map.MapInfo.Metadata.PreviewTime;
+        TimedObject.Time = map.Playable.PreviewTime;
         base.Update();
     }
 

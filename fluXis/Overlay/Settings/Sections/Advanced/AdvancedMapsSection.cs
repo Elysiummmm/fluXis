@@ -8,6 +8,7 @@ using fluXis.Graphics.Sprites.Icons;
 using fluXis.Localization;
 using fluXis.Localization.Categories.Settings;
 using fluXis.Map;
+using fluXis.Modes;
 using fluXis.Overlay.Notifications;
 using fluXis.Overlay.Notifications.Tasks;
 using fluXis.Overlay.Settings.UI;
@@ -41,6 +42,9 @@ public partial class AdvancedMapsSection : SettingsSubSection
 
     [Resolved]
     private GameHost host { get; set; }
+
+    [Resolved]
+    private GameModeManager modes { get; set; }
 
     private Storage cacheStorage => host.CacheStorage.GetStorageForDirectory(FluXisGame.FFT_CACHE_PATH);
 
@@ -129,7 +133,7 @@ public partial class AdvancedMapsSection : SettingsSubSection
                         if (existing == null)
                             continue;
 
-                        var data = map.GetMapInfo();
+                        var data = map.GetPlayable(modes);
 
                         if (data is null)
                             continue;
@@ -137,11 +141,9 @@ public partial class AdvancedMapsSection : SettingsSubSection
                         existing.AccuracyDifficulty = map.AccuracyDifficulty = data.AccuracyDifficulty;
                         existing.HealthDifficulty = map.HealthDifficulty = data.HealthDifficulty;
 
-                        var events = data.GetMapEvents();
-
-                        var filters = MapUtils.GetMapFilters(data, events);
-                        existing.Filters = filters;
-                        map.Filters = filters.Detach();
+                        existing.Filters ??= new RealmMapFilters();
+                        existing.Filters.UpdateFilters(data);
+                        map.Filters = existing.Filters.Detach();
                     }
                 }
             });

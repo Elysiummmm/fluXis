@@ -3,12 +3,14 @@ using System.Linq;
 using fluXis.Input;
 using fluXis.Map;
 using fluXis.Map.Structures;
-using fluXis.Online.API.Models.Maps;
+using fluXis.Map.Structures.Bases;
+using fluXis.Modes.Keys.Map.Objects;
 using fluXis.Online.API.Models.Users;
 using fluXis.Screens.Gameplay.Input;
 
 namespace fluXis.Replays;
 
+// TODO: make per-mode auto generators
 public class AutoGenerator
 {
     /// <summary>
@@ -16,7 +18,7 @@ public class AutoGenerator
     /// </summary>
     private const float key_down_time = 50;
 
-    private MapInfo map { get; }
+    private PlayableMap map { get; }
     private int mode { get; }
     private bool dual { get; }
     private bool split { get; }
@@ -25,12 +27,12 @@ public class AutoGenerator
 
     private List<ReplayFrame> frames { get; } = new();
 
-    public AutoGenerator(MapInfo map, int mode)
+    public AutoGenerator(PlayableMap map, int mode)
     {
         this.map = map;
         this.mode = mode;
         dual = map.IsDual;
-        split = map.DualMode == DualMode.Separate;
+        split = map.IsDualSplit;
 
         keys = GameplayInput.GetKeys(mode, dual).ToList();
     }
@@ -51,7 +53,9 @@ public class AutoGenerator
 
     private void generateFrames()
     {
-        if (map.HitObjects.Count == 0)
+        var objs = map.ObjectsOfType<HitObject>();
+
+        if (objs.Length == 0)
             return;
 
         if (keys.Count <= 0)
@@ -93,7 +97,7 @@ public class AutoGenerator
 #nullable enable
     private IEnumerable<IAction> generateActions()
     {
-        var columns = map.HitObjects.GroupBy(x => x.Lane);
+        var columns = map.ObjectsOfType<HitObject>().GroupBy(x => x.Lane);
 
         foreach (var column in columns)
         {
@@ -104,7 +108,7 @@ public class AutoGenerator
             for (int i = 0; i < objects.Count; i++)
             {
                 var currentObject = objects[i];
-                if (currentObject.Type == HitObjectType.Landmine) continue;
+                if (currentObject is Landmine) continue;
 
                 if (currentObject.Time < blockedUntil)
                     continue;
@@ -131,12 +135,12 @@ public class AutoGenerator
 
     private double? calculateReleaseTime(HitObject currentObject, HitObject nextObject)
     {
-        var endTime = currentObject.EndTime;
+        var endTime = currentObject.GetEndTime();
 
-        if (currentObject.LongNote)
+        if (currentObject is LongNote)
             return endTime;
 
-        if (nextObject?.Type == HitObjectType.Tick)
+        if (nextObject is Tick)
         {
             var diff = nextObject.Time - currentObject.Time;
 

@@ -66,8 +66,8 @@ public partial class ReplayCapability : Component, IRulesetCapability, IEndingCa
     }
 
     RulesetContainer IRulesetCapability.Create() => new ReplayRulesetContainer(
-        modes.Find(Screen.Map.GameMode) ?? throw GameModeManager.FailedToLoadException()
-        , Replay, Screen.Map, Screen.MapEvents, Screen.Mods
+        modes.Find(Screen.Map.Mode) ?? throw GameModeManager.FailedToLoadException()
+        , Replay, Screen.Map, Screen.Mods
     ) { CurrentPlayer = Replay.GetPlayer(users) };
 
     void IRulesetCapability.Modify(RulesetContainer ruleset) => ModifyRuleset((ReplayRulesetContainer)ruleset);

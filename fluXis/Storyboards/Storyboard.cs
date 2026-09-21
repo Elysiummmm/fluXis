@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using fluXis.Map;
 using fluXis.Map.Structures.Bases;
 using fluXis.Screens.Edit;
+using fluXis.Storyboards.Drawables;
 using Midori.Utils;
 using Newtonsoft.Json;
 using osuTK;
@@ -41,6 +43,9 @@ public class Storyboard : EditorMap.IChangeNotifier
     public event Action<ITimedObject> OnAdd;
     public event Action<ITimedObject> OnRemove;
     public event Action<ITimedObject> OnUpdate;
+
+    public DrawableStoryboard CreateDrawable(PlayableMap map, osu.Framework.Platform.Storage storage)
+        => new(map, this, storage.GetFullPath(string.Empty));
 
     public void Update()
     {

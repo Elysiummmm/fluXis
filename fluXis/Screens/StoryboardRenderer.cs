@@ -1,6 +1,7 @@
 ﻿using System;
 using fluXis.Audio;
 using fluXis.Database.Maps;
+using fluXis.Modes;
 using fluXis.Storyboards;
 using fluXis.Storyboards.Drawables;
 using fluXis.Utils;
@@ -44,7 +45,7 @@ public partial class StoryboardRenderer : FluXisScreen
     }
 
     [BackgroundDependencyLoader]
-    private void load(GlobalClock gc)
+    private void load(GlobalClock gc, GameModeManager modes)
     {
         gc.Stop();
 
@@ -54,8 +55,8 @@ public partial class StoryboardRenderer : FluXisScreen
         track.Start();
         track.Volume.Value = 0f;
 
-        var info = map.GetMapInfo()!;
-        var sb = info.CreateDrawableStoryboard()!;
+        var info = map.GetPlayable(modes)!;
+        var sb = info.Storyboard!.CreateDrawable(info, info.Storage);
         LoadComponent(sb);
 
         clock = new ManualFramedClock();
@@ -91,7 +92,9 @@ public partial class StoryboardRenderer : FluXisScreen
         var elapsedFormatted = TimeSpan.FromMilliseconds(elapsed).ToString(@"hh\:mm\:ss");
         var remainingFormatted = TimeSpan.FromMilliseconds(remaining).ToString(@"hh\:mm\:ss");
 
-        Logger.Log($"[{count}] {TimeUtils.Format(clock.CurrentTime)}/{TimeUtils.Format(end)} ({elapsedFormatted}) - {progress:P2} - Estimated Total: {estimatedFormatted} - Remaining: {remainingFormatted}", LoggingTarget.Runtime,
+        Logger.Log(
+            $"[{count}] {TimeUtils.Format(clock.CurrentTime)}/{TimeUtils.Format(end)} ({elapsedFormatted}) - {progress:P2} - Estimated Total: {estimatedFormatted} - Remaining: {remainingFormatted}",
+            LoggingTarget.Runtime,
             LogLevel.Debug);
 
         var image = host.TakeScreenshotAsync().Result;

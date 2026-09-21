@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using fluXis.Map.Structures;
-using osu.Framework.Utils;
 
 namespace fluXis.Screens.Edit.Tabs.Verify.Checks.HitObjects;
 
@@ -9,19 +8,20 @@ public class OverlappingCheck : IVerifyCheck
 {
     public IEnumerable<VerifyIssue> Check(IVerifyContext ctx)
     {
-        var hits = ctx.MapInfo.HitObjects;
-        if (hits.Count == 0) yield break;
+        var hits = ctx.Map.ObjectsOfType<HitObject>();
+        if (hits.Length == 0) yield break;
 
         foreach (var lane in hits.GroupBy(h => h.Lane))
         {
             var hitObjects = lane.ToList();
             if (hitObjects.Count == 0) continue;
 
-            HitObject currentLn = null;
+            // TODO: reimplement
+            /*HitObject currentLn = null;
 
             foreach (var (prev, current) in hitObjects.Zip(hitObjects.Skip(1)))
             {
-                if (prev.HoldTime > 0 && (currentLn == null || prev.EndTime > currentLn.EndTime))
+                if (prev.HoldTime > 0 && (currentLn == null || prev.GetEndTime() > currentLn.GetEndTime()))
                     currentLn = prev;
 
                 bool overlappingTime = Precision.AlmostEquals(current.Time, prev.Time);
@@ -41,7 +41,7 @@ public class OverlappingCheck : IVerifyCheck
 
                 if (currentLn != null && current.Time >= currentLn.EndTime)
                     currentLn = null;
-            }
+            }*/
         }
     }
 }

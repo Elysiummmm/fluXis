@@ -7,6 +7,7 @@ using fluXis.Database.Maps;
 using fluXis.Graphics.UserInterface.Color;
 using fluXis.Map;
 using fluXis.Map.Structures;
+using fluXis.Modes;
 using fluXis.Utils.Extensions;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
@@ -18,6 +19,9 @@ namespace fluXis.Screens.Select.Footer.Practice;
 
 public partial class FooterPracticeGraph : GridContainer
 {
+    [Resolved]
+    private GameModeManager modes { get; set; }
+
     [Resolved]
     private MapStore maps { get; set; }
 
@@ -135,10 +139,11 @@ public partial class FooterPracticeGraph : GridContainer
 
     private void calculate(RealmMap map)
     {
-        var info = map.GetMapInfo();
+        var info = map.GetPlayable(modes);
+        if (info is null) return;
 
-        if (info is null || info.HitObjects.Count == 0)
-            return;
+        var objs = info.ObjectsOfType<HitObject>();
+        if (objs.Length == 0) return;
 
         var count = bars.Count;
         var counters = new float[count];
@@ -146,19 +151,11 @@ public partial class FooterPracticeGraph : GridContainer
 
         timePerBar = (int)endTime / bar_count;
 
-        foreach (var hit in info.HitObjects)
+        foreach (var hit in objs)
         {
             var progress = hit.Time / endTime;
             var idx = (int)Math.Clamp(Math.Floor(count * progress), 0, count - 1);
-
-            var value = hit.Type switch
-            {
-                HitObjectType.Tick => 0.1f,
-                HitObjectType.Landmine => 0f,
-                _ => 1
-            };
-
-            counters[idx] += value;
+            counters[idx] += hit.DensityContribution;
         }
 
         var highest = counters.Max();

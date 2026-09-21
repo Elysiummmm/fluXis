@@ -1,8 +1,8 @@
 using Newtonsoft.Json;
 
-namespace fluXis.Map;
+namespace fluXis.Map.Format.Legacy;
 
-public class MapMetadata
+public class LegacyMapMetadata
 {
     [JsonProperty("title")]
     public string Title { get; set; } = string.Empty;

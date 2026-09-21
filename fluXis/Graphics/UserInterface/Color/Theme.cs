@@ -84,7 +84,7 @@ public static class Theme
     public static Colour4 GetEventColor(ITimedObject obj, bool sidebar = false) => obj switch
     {
         Map.Structures.TimingPoint => TimingPoint,
-        Map.Structures.ScrollVelocity => ScrollVelocity,
+        Map.Structures.Events.ScrollVelocity => ScrollVelocity,
         LaneSwitchEvent => LaneSwitch,
         FlashEvent => Flash,
         PulseEvent => Pulse,

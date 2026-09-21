@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using fluXis.Map.Structures.Events;
 using osu.Framework.Allocation;
+using osu.Framework.Extensions.IEnumerableExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
@@ -26,7 +27,7 @@ public partial class PreviewFlashLayer : CompositeDrawable
         };
     }
 
-    public void Rebuild(List<FlashEvent> flashes)
+    public void Rebuild(IEnumerable<FlashEvent> flashes)
     {
         ClearTransforms(true);
         box.FadeOut();

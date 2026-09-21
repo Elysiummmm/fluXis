@@ -12,11 +12,14 @@ using Newtonsoft.Json;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Logging;
+using rhym;
+using YamlDotNet.Serialization;
 
 namespace fluXis.Map.Structures.Events;
 
 [Description("Applies shader effects to the entire screen.")]
 [Icon(FluXisIconType.Shader)]
+[ResourceLocation("flux:events/shader")]
 public class ShaderEvent : IMapEvent, IHasDuration, IHasEasing, IHasStartValue<ShaderEvent.ShaderParameters>
 {
     [JsonProperty("time")]
@@ -29,7 +32,7 @@ public class ShaderEvent : IMapEvent, IHasDuration, IHasEasing, IHasStartValue<S
     public string Group { get; set; }
 
     [Hidden]
-    [JsonProperty("shader")]
+    [JsonProperty("shader"), YamlIgnore]
     public string ShaderName
     {
         get => Type.ToString();
@@ -58,7 +61,7 @@ public class ShaderEvent : IMapEvent, IHasDuration, IHasEasing, IHasStartValue<S
     public ShaderParameters StartParameters { get; set; } = new();
 
     [Hidden]
-    [JsonIgnore]
+    [JsonIgnore, YamlIgnore]
     public ShaderParameters StartValue
     {
         get => StartParameters;
@@ -68,7 +71,7 @@ public class ShaderEvent : IMapEvent, IHasDuration, IHasEasing, IHasStartValue<S
     [JsonProperty("end-params")]
     public ShaderParameters EndParameters { get; set; } = new();
 
-    [JsonProperty("params")]
+    [JsonProperty("params"), YamlIgnore]
     [Obsolete($"Use {nameof(EndParameters)} instead.")]
     public ShaderParameters Parameters { set => EndParameters = value; }
 

@@ -1,3 +1,4 @@
+/*
 using System.Linq;
 using fluXis.Configuration;
 using fluXis.Map.Structures;
@@ -75,10 +76,10 @@ public partial class HitObjectManager : Container<HitObjectColumn>
                                                {
                                                    var lane = i + 1;
 
-                                                   if (ruleset.MapInfo.IsSplit)
+                                                   if (ruleset.Map.IsSplit)
                                                        lane += KeyCount * playfield.PlayerIndex;
 
-                                                   return new HitObjectColumn(ruleset.MapInfo, ruleset, this, lane);
+                                                   return new HitObjectColumn(ruleset.Map, ruleset, this, lane);
                                                });
 
         useSnapColors = config.GetBindable<bool>(FluXisSetting.SnapColoring);
@@ -214,3 +215,4 @@ public partial class HitObjectManager : Container<HitObjectColumn>
         channel?.Play();
     }
 }
+*/

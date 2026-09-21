@@ -7,6 +7,7 @@ using Midori.Utils.Extensions;
 using Newtonsoft.Json;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using YamlDotNet.Serialization;
 
 namespace fluXis.Map.Structures;
 
@@ -28,10 +29,10 @@ public class TimingPoint : ITimedObject
     [JsonProperty("hide-lines")]
     public bool HideLines { get; set; }
 
-    [JsonIgnore]
+    [JsonIgnore, YamlIgnore]
     public float MsPerBeat => 60000f / BPM;
 
-    [JsonIgnore]
+    [JsonIgnore, YamlIgnore]
     string ITimedObject.Group { get; set; }
 
     IEnumerable<Drawable> ITimedObject.CreateObjectOverlay(EditorDrawableObject obj)

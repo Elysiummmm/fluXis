@@ -11,12 +11,13 @@ using Midori.Utils.Extensions;
 using Newtonsoft.Json;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using YamlDotNet.Serialization;
 
-namespace fluXis.Map.Structures;
+namespace fluXis.Map.Structures.Events;
 
 [DoNotShowInEditorPlayfield]
 [Description("Changes note and scroll velocity.")]
-public class ScrollVelocity : ITimedObject, IHasGroups
+public class ScrollVelocity : ITimedObject, IHasGroups, IScrollEvent
 {
     [JsonProperty("time")]
     public double Time { get; set; }
@@ -34,7 +35,7 @@ public class ScrollVelocity : ITimedObject, IHasGroups
     [JsonProperty("groups", DefaultValueHandling = DefaultValueHandling.Ignore)]
     public List<string> Groups { get; set; } = new();
 
-    [JsonProperty("mask")]
+    [JsonProperty("mask"), YamlIgnore]
     [Obsolete($"Use {nameof(ScrollVelocity)}.{nameof(Groups)} instead.")]
     public List<bool> LaneMask
     {

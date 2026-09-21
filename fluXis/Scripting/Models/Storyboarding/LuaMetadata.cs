@@ -40,12 +40,12 @@ public class LuaMetadata : ILuaModel
     [LuaMember(Name = "cover")]
     public string Cover { get; }
 
-    public LuaMetadata(MapInfo map)
+    public LuaMetadata(PlayableMap map)
     {
-        Title = map.Metadata.Title;
-        Artist = map.Metadata.Artist;
-        Mapper = map.Metadata.Mapper;
-        Difficulty = map.Metadata.Difficulty;
+        Title = map.Title;
+        Artist = map.Artist;
+        Mapper = map.Creator;
+        Difficulty = map.Difficulty;
         Background = map.BackgroundFile;
         Cover = map.CoverFile;
     }

@@ -2,13 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using fluXis.Map;
 using fluXis.Map.Structures;
 using fluXis.Map.Structures.Attributes;
 using fluXis.Map.Structures.Bases;
+using fluXis.Modes.Keys.Map.Objects;
 using fluXis.Screens.Edit.Tabs.Charting.Playfield.Objects.Events;
 using fluXis.Screens.Edit.Tabs.Charting.Playfield.Objects.Hits;
 using fluXis.Screens.Edit.Tabs.Verify;
 using osu.Framework.Allocation;
+using osu.Framework.Extensions.IEnumerableExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osuTK;
@@ -43,13 +46,16 @@ public partial class EditorHitObjectContainer : Container<EditorDrawableObject>
     {
         RelativeSizeAxes = Axes.Both;
 
-        registerEffect(map.MapInfo.HitObjects);
-        registerEffect(map.MapInfo.TimingPoints);
+        registerEffect(map.Playable.ObjectsOfType<HitObject>());
+        registerEffect(map.Playable.ObjectsOfType<TimingPoint>());
 
-        foreach (var (type, list) in map.MapEvents.GetListsForTypes())
+        foreach (var type in IMapEvent.GetAllTypes())
         {
             if (type.GetCustomAttribute<DoNotShowInEditorPlayfieldAttribute>() != null)
                 continue;
+
+            var listMethod = map.Playable.GetType().GetRuntimeMethod(nameof(PlayableMap.ObjectsOfType), [])!.MakeGenericMethod(type);
+            var list = listMethod.Invoke(map.Playable, []);
 
             var method = GetType().GetMethod(nameof(registerEffect), BindingFlags.Instance | BindingFlags.NonPublic)!;
             method = method.MakeGenericMethod(type);
@@ -57,7 +63,7 @@ public partial class EditorHitObjectContainer : Container<EditorDrawableObject>
         }
     }
 
-    private void registerEffect<T>(List<T> list) where T : class, ITimedObject
+    private void registerEffect<T>(T[] list) where T : class, ITimedObject
     {
         map.RegisterAddListener<T>(add);
         map.RegisterRemoveListener<T>(remove);
@@ -72,41 +78,30 @@ public partial class EditorHitObjectContainer : Container<EditorDrawableObject>
             obj.Lane = atTime.Count() + 1 + ((IVerifyContext)map).MaxKeyCount;
         }
 
-        EditorDrawableObject draw = null;
+        EditorDrawableObject draw;
 
         switch (obj)
         {
-            case HitObject hit:
-            {
-                switch (hit.Type)
-                {
-                    case HitObjectType.Normal:
-                        if (hit.LongNote)
-                            draw = new EditorLongNote(hit);
-                        else
-                            draw = new EditorSingleNote(hit);
-
-                        break;
-
-                    case HitObjectType.Tick:
-                        draw = new EditorTickNote(hit);
-                        break;
-
-                    case HitObjectType.Landmine:
-                        draw = new EditorLandmine(hit);
-                        break;
-                }
-
+            case Note o:
+                draw = new EditorSingleNote(o);
                 break;
-            }
+
+            case LongNote o:
+                draw = new EditorLongNote(o);
+                break;
+
+            case Tick o:
+                draw = new EditorTickNote(o);
+                break;
+
+            case Landmine o:
+                draw = new EditorLandmine(o);
+                break;
 
             default:
                 draw = new EditorDrawableEvent(obj);
                 break;
         }
-
-        if (draw is null)
-            return;
 
         LoadComponent(draw);
         charting.ObjectDrawables[obj] = draw;

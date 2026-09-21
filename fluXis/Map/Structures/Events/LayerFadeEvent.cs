@@ -10,10 +10,12 @@ using Midori.Utils.Extensions;
 using Newtonsoft.Json;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using rhym;
 
 namespace fluXis.Map.Structures.Events;
 
 [Description("Fades specific elements in/out.")]
+[ResourceLocation("flux:events/layerfade")]
 public class LayerFadeEvent : IMapEvent, IApplicableToPlayfield, IHasDuration, IHasEasing
 {
     [JsonProperty("time")]

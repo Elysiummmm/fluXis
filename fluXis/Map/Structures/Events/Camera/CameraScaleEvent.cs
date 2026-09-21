@@ -8,10 +8,12 @@ using Midori.Utils.Extensions;
 using Newtonsoft.Json;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using rhym;
 
 namespace fluXis.Map.Structures.Events.Camera;
 
 [Description("Scales the camera.")]
+[ResourceLocation("flux:events/camera/scale")]
 public class CameraScaleEvent : ICameraEvent, IHasDuration, IHasEasing
 {
     [JsonProperty("time")]

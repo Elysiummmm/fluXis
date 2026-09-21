@@ -1,3 +1,4 @@
+/*
 using fluXis.Input;
 using fluXis.Map.Structures;
 using fluXis.Skinning.Bases.HitObjects;
@@ -49,3 +50,4 @@ public partial class DrawableNote : DrawableHitObject
         return UpdateJudgement(true);
     }
 }
+*/

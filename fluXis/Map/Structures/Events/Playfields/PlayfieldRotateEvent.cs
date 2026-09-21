@@ -12,12 +12,14 @@ using Midori.Utils.Extensions;
 using Newtonsoft.Json;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using rhym;
 
 namespace fluXis.Map.Structures.Events.Playfields;
 
 [AnimatesProperty(nameof(Playfield.Rotation))]
 [Description("Rotates the playfield.")]
 [Icon(FluXisIconType.PlayfieldRotate)]
+[ResourceLocation("flux:events/playfield/rotate")]
 public class PlayfieldRotateEvent : IMapEvent, IHasDuration, IHasEasing, IApplicableToPlayfield
 {
     [JsonProperty("time")]

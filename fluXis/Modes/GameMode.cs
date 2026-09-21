@@ -22,9 +22,9 @@ public abstract class GameMode : IFromAssembly
 
     public abstract void RegisterObjects(RhymIO io);
 
-    public abstract PlayableGameMode CreatePlayable(RulesetContainer ruleset, MapInfo map, MapEvents events, IMod[] mods);
+    public abstract PlayableGameMode CreatePlayable(RulesetContainer ruleset, PlayableMap map, IMod[] mods);
 
-    public virtual HealthProcessor CreateHealthProcessor(MapInfo map, IMod[] mods, IFrameBasedClock clock, Bindable<bool> inBreak, Action? onDeath = null)
+    public virtual HealthProcessor CreateHealthProcessor(PlayableMap map, IMod[] mods, IFrameBasedClock clock, Bindable<bool> inBreak, Action? onDeath = null)
     {
         HealthProcessor? processor = null;
 

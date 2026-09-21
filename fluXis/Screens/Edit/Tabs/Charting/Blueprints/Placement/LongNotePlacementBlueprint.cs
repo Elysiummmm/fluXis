@@ -1,6 +1,8 @@
 using System;
 using System.Linq;
 using fluXis.Map.Structures;
+using fluXis.Map.Structures.Bases;
+using fluXis.Modes.Keys.Map.Objects;
 using fluXis.Screens.Edit.Tabs.Charting.Playfield;
 using osu.Framework.Graphics;
 using osu.Framework.Input.Events;
@@ -9,7 +11,7 @@ using osuTK.Input;
 
 namespace fluXis.Screens.Edit.Tabs.Charting.Blueprints.Placement;
 
-public partial class LongNotePlacementBlueprint : NotePlacementBlueprint
+public partial class LongNotePlacementBlueprint : NotePlacementBlueprint<LongNote>
 {
     private readonly BlueprintLongNoteBody body;
     private readonly BlueprintNotePiece head;
@@ -54,7 +56,7 @@ public partial class LongNotePlacementBlueprint : NotePlacementBlueprint
         if (Object is not HitObject hit) return;
 
         head.Position = ToLocalSpace(PositionProvider.ScreenSpacePositionAtTime(hit.Time, hit.Lane));
-        end.Position = ToLocalSpace(PositionProvider.ScreenSpacePositionAtTime(hit.EndTime, hit.Lane));
+        end.Position = ToLocalSpace(PositionProvider.ScreenSpacePositionAtTime(hit.GetEndTime(), hit.Lane));
         body.Height = Math.Abs(head.Y - end.Y);
         body.Position = new Vector2(head.X, head.Y - head.DrawHeight / 2);
     }
@@ -70,19 +72,19 @@ public partial class LongNotePlacementBlueprint : NotePlacementBlueprint
     public override void UpdatePlacement(double time, int lane)
     {
         base.UpdatePlacement(time, lane);
-        if (Object is not HitObject hit) return;
+        if (Object is not LongNote ln) return;
 
         if (State == PlacementState.Placing)
         {
-            hit.Time = time < originalStartTime ? time : originalStartTime;
-            hit.HoldTime = Math.Abs(time - originalStartTime);
+            ln.Time = time < originalStartTime ? time : originalStartTime;
+            ln.Duration = Math.Abs(time - originalStartTime);
         }
-        else originalStartTime = hit.Time = time;
+        else originalStartTime = ln.Time = time;
     }
 
     protected override void OnPlacementFinished(bool commit)
     {
-        var notesBetween = Map.MapInfo.HitObjects.Where(h => h.Time > Hit.Time && h.Time < Hit.EndTime && h.Lane == Hit.Lane).ToList();
+        var notesBetween = Map.Playable.ObjectsOfType<HitObject>().Where(h => h.Time > Hit.Time && h.Time < Hit.GetEndTime() && h.Lane == Hit.Lane).ToList();
 
         if (notesBetween.Count > 0)
         {

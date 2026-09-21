@@ -13,12 +13,14 @@ using Newtonsoft.Json;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osuTK;
+using rhym;
 
 namespace fluXis.Map.Structures.Events.Playfields;
 
 [AnimatesProperty(nameof(Playfield.AnimationScale))]
 [Description("Scales the playfield.")]
 [Icon(FluXisIconType.PlayfieldScale)]
+[ResourceLocation("flux:events/playfield/scale")]
 public class PlayfieldScaleEvent : IMapEvent, IHasDuration, IHasEasing, IApplicableToPlayfield
 {
     [JsonProperty("time")]

@@ -1,20 +1,16 @@
-using System.Collections.Generic;
-using System.Linq;
 using fluXis.Graphics.Sprites.Icons;
 using fluXis.Graphics.UserInterface.Buttons;
 using fluXis.Graphics.UserInterface.Color;
-using fluXis.Mods;
+using fluXis.Map.Format;
+using fluXis.Map.Structures;
+using fluXis.Modes;
 using fluXis.Overlay.Notifications;
-using fluXis.Replays;
 using fluXis.Screens.Edit.UI.BottomBar.Timeline;
-using fluXis.Screens.Gameplay;
-using fluXis.Screens.Gameplay.Capabilities;
 using fluXis.UI;
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
-using osu.Framework.Screens;
 
 namespace fluXis.Screens.Edit.UI.BottomBar;
 
@@ -22,6 +18,9 @@ public partial class EditorBottomBar : Container
 {
     [Resolved]
     private NotificationManager notifications { get; set; }
+
+    [Resolved]
+    private GameModeManager modes { get; set; }
 
     [Resolved]
     private EditorMap map { get; set; }
@@ -97,19 +96,19 @@ public partial class EditorBottomBar : Container
                                     Corner = Corner.BottomRight,
                                     Action = () =>
                                     {
-                                        if (map.MapInfo == null)
+                                        if (map.Playable == null)
                                         {
                                             notifications.SendError("Map is null!", "i dont know how this happened but it did");
                                             return;
                                         }
 
-                                        if (map.MapInfo?.HitObjects == null || map.MapInfo.HitObjects.Count == 0)
+                                        if (map.Playable.ObjectsOfType<HitObject>().Length == 0)
                                         {
                                             notifications.SendError("This map has no hitobjects!");
                                             return;
                                         }
 
-                                        if (map.MapInfo?.TimingPoints == null || map.MapInfo.TimingPoints.Count == 0)
+                                        if (map.Playable.ObjectsOfType<TimingPoint>().Length == 0)
                                         {
                                             notifications.SendError("This map has no timing points!");
                                             return;
@@ -120,8 +119,12 @@ public partial class EditorBottomBar : Container
                                         clock.Stop();
                                         var startTime = clock.CurrentTime;
 
-                                        var clone = map.MapInfo.DeepClone();
-                                        clone.RealmEntry = map.MapInfo.RealmEntry;
+                                        // TODO: complete this
+                                        var format = new RhymMapFormat(map.Playable.Storage, modes);
+                                        // var raw = format.Copy(map.Playable);
+
+                                        /*var clone = map.Playable.DeepClone();
+                                        clone.RealmEntry = map.Playable.RealmEntry;
                                         clone.HitObjects = clone.HitObjects.Where(o => o.Time > startTime).ToList();
 
                                         var mods = new List<IMod>();
@@ -154,7 +157,7 @@ public partial class EditorBottomBar : Container
                                                 screen = screen.RegisterCapability(new ReplayCapability(new AutoGenerator(clone, map.RealmMap.KeyCount).Generate()));
 
                                             return screen;
-                                        }));
+                                        }));*/
                                     }
                                 }
                             }

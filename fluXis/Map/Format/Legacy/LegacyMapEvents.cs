@@ -14,9 +14,9 @@ using Midori.Utils;
 using Newtonsoft.Json;
 using osu.Framework.Graphics;
 
-namespace fluXis.Map;
+namespace fluXis.Map.Format.Legacy;
 
-public class MapEvents
+public class LegacyMapEvents
 {
     [JsonProperty("laneswitch")]
     public List<LaneSwitchEvent> LaneSwitchEvents { get; private set; } = new();
@@ -111,7 +111,7 @@ public class MapEvents
     #endregion
 
     public static T Load<T>(string content)
-        where T : MapEvents, new()
+        where T : LegacyMapEvents, new()
     {
         if (!content.Trim().StartsWith('{'))
             return new T().loadLegacy(content) as T;
@@ -121,7 +121,7 @@ public class MapEvents
         return events.Sort() as T;
     }
 
-    private MapEvents loadLegacy(string content)
+    private LegacyMapEvents loadLegacy(string content)
     {
         var lines = content.Split(Environment.NewLine);
 
@@ -374,7 +374,7 @@ public class MapEvents
         }
     }
 
-    public MapEvents Sort()
+    public LegacyMapEvents Sort()
     {
         foreach (var prop in AllListProperties)
         {
@@ -383,7 +383,7 @@ public class MapEvents
             var list = prop.GetValue(this);
             if (list is null) continue;
 
-            var compare = typeof(MapEvents).GetMethod(nameof(MapEvents.compare), BindingFlags.Static | BindingFlags.NonPublic);
+            var compare = typeof(LegacyMapEvents).GetMethod(nameof(LegacyMapEvents.compare), BindingFlags.Static | BindingFlags.NonPublic);
             var comparison = Delegate.CreateDelegate(typeof(Comparison<>).MakeGenericType(itemType), compare);
 
             var sort = typeof(List<>).MakeGenericType(itemType).GetMethod("Sort", new[] { comparison.GetType() });

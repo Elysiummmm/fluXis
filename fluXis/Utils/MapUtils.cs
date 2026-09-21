@@ -9,6 +9,10 @@ using fluXis.Database.Maps;
 using fluXis.Localization.Categories;
 using fluXis.Map;
 using fluXis.Map.Structures;
+using fluXis.Map.Structures.Bases;
+using fluXis.Map.Structures.Events;
+using fluXis.Map.Structures.Events.Playfields;
+using fluXis.Map.Structures.Events.Scrolling;
 using fluXis.Online.API.Models.Maps;
 using fluXis.Utils.Attributes;
 using osu.Framework.Extensions;
@@ -144,25 +148,26 @@ public static class MapUtils
         return compareDifficulty(firstLowest, secondLowest);
     }
 
-    public static RealmMapFilters UpdateFilters(this RealmMapFilters filters, MapInfo map, MapEvents events)
+    public static RealmMapFilters UpdateFilters(this RealmMapFilters filters, PlayableMap map)
     {
         filters.Reset();
 
-        foreach (var hitObject in map.HitObjects)
+        foreach (var hitObject in map.ObjectsOfType<HitObject>())
         {
-            filters.Length = (float)Math.Max(filters.Length, hitObject.EndTime);
+            filters.Length = (float)Math.Max(filters.Length, hitObject.GetEndTime());
 
-            if (hitObject.LongNote)
+            // TODO: fix :bellfast:
+            /*if (hitObject.LongNote)
                 filters.LongNoteCount++;
             else if (hitObject.Landmine)
                 filters.LandmineCount++;
             else
-                filters.NoteCount++;
+                filters.NoteCount++;*/
         }
 
-        filters.NotesPerSecond = GetNps(map.HitObjects);
+        filters.NotesPerSecond = GetNps(map.ObjectsOfType<HitObject>());
 
-        foreach (var timingPoint in map.TimingPoints)
+        foreach (var timingPoint in map.ObjectsOfType<TimingPoint>())
         {
             if (filters.BPMMin == 0)
                 filters.BPMMin = timingPoint.BPM;
@@ -171,86 +176,78 @@ public static class MapUtils
             filters.BPMMax = Math.Max(filters.BPMMax, timingPoint.BPM);
         }
 
-        if (map.ScrollVelocities.Count >= 20)
+        if (map.ObjectsOfType<ScrollVelocity>().Length >= 20)
             filters.Effects |= MapEffectType.ScrollVelocity;
 
-        if (events != null)
-            filters.Effects = GetEffects(events);
-
+        filters.Effects |= GetEffects(map);
         return filters;
     }
 
-    public static RealmMapFilters GetMapFilters(MapInfo map, MapEvents events)
-        => new RealmMapFilters().UpdateFilters(map, events);
+    public static RealmMapFilters GetMapFilters(PlayableMap map)
+        => new RealmMapFilters().UpdateFilters(map);
 
-    public static MapEffectType GetEffects(MapEvents events)
+    public static MapEffectType GetEffects(PlayableMap map)
     {
         MapEffectType effects = 0;
 
-        if (events.LaneSwitchEvents.Count > 0)
+        if (map.ObjectsOfType<LaneSwitchEvent>().Length > 0)
             effects |= MapEffectType.LaneSwitch;
 
-        if (events.FlashEvents.Count > 0)
+        if (map.ObjectsOfType<FlashEvent>().Length > 0)
             effects |= MapEffectType.Flash;
 
-        if (events.ColorFadeEvents.Count > 0)
+        if (map.ObjectsOfType<ColorFadeEvent>().Length > 0)
             effects |= MapEffectType.ColorFade;
 
-        if (events.PulseEvents.Count > 0)
+        if (map.ObjectsOfType<PulseEvent>().Length > 0)
             effects |= MapEffectType.Pulse;
 
-        if (events.PlayfieldMoveEvents.Count > 0)
+        if (map.ObjectsOfType<PlayfieldMoveEvent>().Length > 0)
             effects |= MapEffectType.PlayfieldMove;
 
-        if (events.PlayfieldScaleEvents.Count > 0)
+        if (map.ObjectsOfType<PlayfieldScaleEvent>().Length > 0)
             effects |= MapEffectType.PlayfieldScale;
 
-        if (events.PlayfieldRotateEvents.Count > 0)
+        if (map.ObjectsOfType<PlayfieldRotateEvent>().Length > 0)
             effects |= MapEffectType.PlayfieldRotate;
 
         /*if (events.PlayfieldFadeEvents.Count > 0)
             effects |= MapEffectType.PlayfieldFade;*/
 
-        if (events.ShakeEvents.Count > 0)
+        if (map.ObjectsOfType<ShakeEvent>().Length > 0)
             effects |= MapEffectType.Shake;
 
-        if (events.ShaderEvents.Count > 0)
+        if (map.ObjectsOfType<ShaderEvent>().Length > 0)
             effects |= MapEffectType.Shader;
 
-        if (events.BeatPulseEvents.Count > 0)
+        if (map.ObjectsOfType<BeatPulseEvent>().Length > 0)
             effects |= MapEffectType.BeatPulse;
 
-        if (events.LayerFadeEvents.Count > 0)
+        if (map.ObjectsOfType<LayerFadeEvent>().Length > 0)
             effects |= MapEffectType.LayerFade;
 
-        if (events.HitObjectEaseEvents.Count > 0)
+        if (map.ObjectsOfType<HitObjectEaseEvent>().Length > 0)
             effects |= MapEffectType.HitObjectEase;
 
-        if (events.ScrollMultiplyEvents.Count > 0)
+        if (map.ObjectsOfType<ScrollMultiplierEvent>().Length > 0)
             effects |= MapEffectType.ScrollMultiply;
 
-        if (events.TimeOffsetEvents.Count > 0)
+        if (map.ObjectsOfType<TimeOffsetEvent>().Length > 0)
             effects |= MapEffectType.TimeOffset;
 
         return effects;
     }
 
-    public static float GetNps(List<HitObject> hitObjects)
+    public static float GetNps(HitObject[] hits)
     {
-        if (hitObjects.Count == 0) return 0;
+        if (hits.Length == 0) return 0;
 
         Dictionary<int, float> seconds = new Dictionary<int, float>();
 
-        foreach (var hitObject in hitObjects)
+        foreach (var hitObject in hits)
         {
             int second = (int)hitObject.Time / 1000;
-
-            var value = hitObject.Type switch
-            {
-                HitObjectType.Tick => 0.1f, // tick
-                HitObjectType.Landmine => 0, // landmine
-                _ => 1
-            };
+            var value = hitObject.DensityContribution;
 
             if (!seconds.TryAdd(second, value))
                 seconds[second] += value;

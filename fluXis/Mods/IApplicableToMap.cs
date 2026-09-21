@@ -4,5 +4,5 @@ namespace fluXis.Mods;
 
 public interface IApplicableToMap
 {
-    void Apply(MapInfo map);
+    void Apply(PlayableMap map);
 }

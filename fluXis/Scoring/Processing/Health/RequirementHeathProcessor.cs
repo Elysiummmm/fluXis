@@ -19,7 +19,7 @@ public class RequirementHeathProcessor : HealthProcessor
     {
     }
 
-    public override void ApplyMap(MapInfo map)
+    public override void ApplyMap(PlayableMap map)
     {
         multiplier = 1f / (map.MaxCombo * 0.05f);
         multiplier *= 100f;

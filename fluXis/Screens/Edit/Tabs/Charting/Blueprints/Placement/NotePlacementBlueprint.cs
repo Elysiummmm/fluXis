@@ -8,17 +8,18 @@ using osu.Framework.Input;
 
 namespace fluXis.Screens.Edit.Tabs.Charting.Blueprints.Placement;
 
-public partial class NotePlacementBlueprint : PlacementBlueprint
+public partial class NotePlacementBlueprint<T> : PlacementBlueprint
+    where T : HitObject, new()
 {
     [Resolved]
     private ChartingContainer chartingContainer { get; set; }
 
-    protected HitObject Hit => Object as HitObject;
+    protected T Hit => Object as T;
 
     private InputManager input;
 
     protected NotePlacementBlueprint()
-        : base(new HitObject())
+        : base(new T())
     {
     }
 
@@ -39,9 +40,9 @@ public partial class NotePlacementBlueprint : PlacementBlueprint
         if (!commit)
             return;
 
-        Hit.HitSound = chartingContainer.CurrentHitSound.Value;
+        Hit.Sample = chartingContainer.CurrentHitSound.Value;
 
-        if (input.CurrentState.Keyboard.ShiftPressed && Map.MapInfo.IsSplit)
+        if (input.CurrentState.Keyboard.ShiftPressed && Map.Playable.IsDualSplit)
         {
             var clone = Hit.JsonCopy();
 

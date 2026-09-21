@@ -9,11 +9,13 @@ using Midori.Utils.Extensions;
 using Newtonsoft.Json;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using rhym;
 
 namespace fluXis.Map.Structures.Events.Scrolling;
 
 [Description("Adjusts scroll speed directly.")]
-public class ScrollMultiplierEvent : IMapEvent, IHasDuration, IHasEasing, IHasGroups
+[ResourceLocation("flux:events/scroll/multiply")]
+public class ScrollMultiplierEvent : IMapEvent, IHasDuration, IHasEasing, IHasGroups, IScrollEvent
 {
     [JsonProperty("time")]
     public double Time { get; set; }

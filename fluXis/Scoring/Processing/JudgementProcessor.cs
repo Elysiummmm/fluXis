@@ -22,7 +22,7 @@ public class JudgementProcessor
         }
     }
 
-    public void ApplyMap(MapInfo map)
+    public void ApplyMap(PlayableMap map)
     {
         dependants.ForEach(d => d.ApplyMap(map));
     }

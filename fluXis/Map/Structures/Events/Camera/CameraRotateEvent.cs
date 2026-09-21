@@ -7,10 +7,12 @@ using fluXis.Screens.Edit.Tabs.Charting.Playfield;
 using Newtonsoft.Json;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using rhym;
 
 namespace fluXis.Map.Structures.Events.Camera;
 
 [Description("Rotates the camera.")]
+[ResourceLocation("flux:events/camera/rotate")]
 public class CameraRotateEvent : ICameraEvent, IHasDuration, IHasEasing
 {
     [JsonProperty("time")]

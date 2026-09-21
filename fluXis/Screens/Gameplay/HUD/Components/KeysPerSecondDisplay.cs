@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using fluXis.Graphics.Sprites.Text;
-using fluXis.Input;
+using fluXis.Modes.Gameplay.Input;
 using fluXis.Utils.Attributes;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
@@ -31,7 +31,7 @@ public partial class KeysPerSecondDisplay : GameplayHUDComponent
     protected override void LoadComplete()
     {
         base.LoadComplete();
-        Ruleset.Input.OnPress += onPress;
+        (Ruleset.PlayableMode.Keybinds as IGameModeActions)!.OnActionPress += onPress;
     }
 
     protected override void Update()
@@ -45,8 +45,8 @@ public partial class KeysPerSecondDisplay : GameplayHUDComponent
     protected override void Dispose(bool isDisposing)
     {
         base.Dispose(isDisposing);
-        Ruleset.Input.OnPress -= onPress;
+        (Ruleset.PlayableMode.Keybinds as IGameModeActions)!.OnActionPress -= onPress;
     }
 
-    private void onPress(FluXisGameplayKeybind _) => times.Add(Clock.CurrentTime);
+    private void onPress(int _) => times.Add(Clock.CurrentTime);
 }

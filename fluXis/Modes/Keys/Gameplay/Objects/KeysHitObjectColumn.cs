@@ -21,8 +21,8 @@ public partial class KeysHitObjectColumn : KeysHitObjectManager
     public override float HitPosition => hitPosition;
     private float hitPosition;
 
-    public KeysHitObjectColumn(RulesetContainer ruleset, MapInfo map, MapEvents events, int idx, IEnumerable<HitObject> objs)
-        : base(ruleset, map, events, objs, true)
+    public KeysHitObjectColumn(RulesetContainer ruleset, PlayableMap map, int idx, IEnumerable<HitObject> objs)
+        : base(ruleset, map, objs, true)
     {
         Index = idx;
         DefaultScrollGroup = ruleset.ScrollGroups[$"${Index}"];

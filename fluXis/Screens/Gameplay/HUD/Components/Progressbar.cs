@@ -57,11 +57,11 @@ public partial class Progressbar : GameplayHUDComponent
     {
         base.Update();
 
-        int timeLeft = (int)((Deps.MapInfo.EndTime - Deps.CurrentTime) / Deps.PlaybackRate);
-        int totalTime = (int)((Deps.MapInfo.EndTime - Deps.MapInfo.StartTime) / Deps.PlaybackRate);
+        int timeLeft = (int)((Deps.Map.EndTime - Deps.CurrentTime) / Deps.PlaybackRate);
+        int totalTime = (int)((Deps.Map.EndTime - Deps.Map.StartTime) / Deps.PlaybackRate);
 
-        int currentTime = (int)((Deps.Ruleset.ParentClock.CurrentTime - Deps.MapInfo.StartTime) / Deps.PlaybackRate);
-        int catchupTime = (int)((Deps.CurrentTime - Deps.MapInfo.StartTime) / Deps.PlaybackRate);
+        int currentTime = (int)((Deps.Ruleset.ParentClock.CurrentTime - Deps.Map.StartTime) / Deps.PlaybackRate);
+        int catchupTime = (int)((Deps.CurrentTime - Deps.Map.StartTime) / Deps.PlaybackRate);
 
         float percent = (float)currentTime / totalTime;
         float catchupPercent = (float)catchupTime / totalTime;
@@ -153,8 +153,8 @@ public partial class Progressbar : GameplayHUDComponent
             if (progress < 0) progress = 0;
             if (progress > 1) progress = 1;
 
-            var startTime = Progressbar.Deps.MapInfo.StartTime;
-            var endTime = Progressbar.Deps.MapInfo.EndTime;
+            var startTime = Progressbar.Deps.Map.StartTime;
+            var endTime = Progressbar.Deps.Map.EndTime;
             double newTime = startTime + (endTime - startTime) * progress;
             Progressbar.Deps.Ruleset.ParentClock.Seek(newTime);
             return true;

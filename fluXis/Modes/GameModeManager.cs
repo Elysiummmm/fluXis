@@ -19,7 +19,11 @@ public partial class GameModeManager : AssemblyLoader<GameMode>
     }
 
     [CanBeNull]
-    public GameMode Find(ResourceLocation location) => Loaded.FirstOrDefault(x => x.Location == location);
+    public GameMode Find(ResourceLocation location)
+    {
+        var normalized = new ResourceLocation(location.Namespace, location.Path.Split('/').First());
+        return Loaded.FirstOrDefault(x => x.Location == normalized);
+    }
 
     public bool Exists(ResourceLocation location) => Loaded.Any(x => x.Location == location);
 

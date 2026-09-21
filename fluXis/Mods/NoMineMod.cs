@@ -16,8 +16,10 @@ public class NoMineMod : IMod, IApplicableToMap
     public bool Rankable => true;
     public Type[] IncompatibleMods => Array.Empty<Type>();
 
-    public void Apply(MapInfo map)
+    public void Apply(PlayableMap map)
     {
-        map.HitObjects.RemoveAll(hitObject => hitObject.Landmine);
+        // TODO: move to keys mode
+        // map.RemoveObjects(map.ObjectsOfType<>());
+        // map.HitObjects.RemoveAll(hitObject => hitObject.Landmine);
     }
 }

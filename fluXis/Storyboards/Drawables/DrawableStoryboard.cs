@@ -29,13 +29,13 @@ public partial class DrawableStoryboard : CompositeDrawable
     protected AudioAnalyzer AudioAnalyzer { get; private set; }
 
     public Storyboard Storyboard { get; }
-    protected MapInfo Map { get; }
+    protected PlayableMap Map { get; }
     private string assetPath { get; }
 
     public StoryboardStorage Storage { get; private set; }
     private Dictionary<string, StoryboardScriptRunner> scripts { get; } = new();
 
-    public DrawableStoryboard(MapInfo map, Storyboard storyboard, string assetPath)
+    public DrawableStoryboard(PlayableMap map, Storyboard storyboard, string assetPath)
     {
         Map = map;
         Storyboard = storyboard;

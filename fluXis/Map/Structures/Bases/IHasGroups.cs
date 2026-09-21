@@ -3,7 +3,7 @@ using fluXis.Screens.Gameplay.Ruleset;
 
 namespace fluXis.Map.Structures.Bases;
 
-public interface IHasGroups
+public interface IHasGroups : ITimedObject
 {
     List<string> Groups { get; set; }
 

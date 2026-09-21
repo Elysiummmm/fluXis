@@ -8,7 +8,7 @@ public class EditorSnapProvider
     private EditorSettings settings { get; }
     private EditorClock clock { get; }
 
-    public float CurrentStep => map.MapInfo.GetTimingPoint(clock.CurrentTime).MsPerBeat / settings.SnapDivisor;
+    public float CurrentStep => map.Playable.GetTimingPoint(clock.CurrentTime).MsPerBeat / settings.SnapDivisor;
 
     public EditorSnapProvider(EditorMap map, EditorSettings settings, EditorClock clock)
     {
@@ -28,7 +28,7 @@ public class EditorSnapProvider
 
         if (snap <= 0) snap = settings.SnapDivisor;
 
-        var tp = map.MapInfo.GetTimingPoint(time);
+        var tp = map.Playable.GetTimingPoint(time);
         var t = tp.Time;
         double increase = tp.MsPerBeat / snap;
         if (increase == 0) return time; // no snapping, the game will just freeze because it loops infinitely

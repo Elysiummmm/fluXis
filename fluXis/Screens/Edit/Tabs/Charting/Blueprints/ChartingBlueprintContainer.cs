@@ -82,7 +82,7 @@ public partial class ChartingBlueprintContainer : BlueprintContainer<ITimedObjec
         map.RegisterAddListener<HitObject>(AddBlueprint);
         map.RegisterRemoveListener<HitObject>(RemoveBlueprint);
 
-        foreach (var (type, _) in map.MapEvents.GetListsForTypes())
+        foreach (var type in IMapEvent.GetAllTypes())
         {
             if (type.GetCustomAttribute<DoNotShowInEditorPlayfieldAttribute>() != null)
                 continue;

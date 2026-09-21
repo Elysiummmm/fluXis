@@ -1,25 +1,23 @@
 using System.Collections.Generic;
 using fluXis.Graphics.UserInterface.Color;
-using fluXis.Map.Structures;
+using fluXis.Modes.Keys.Map.Objects;
 using fluXis.Skinning.Default.HitObject;
 using osu.Framework.Graphics;
 
 namespace fluXis.Screens.Edit.Tabs.Charting.Playfield.Objects.Hits;
 
-public partial class EditorLandmine : EditorDrawableHitObject
+public partial class EditorLandmine : EditorDrawableHitObject<Landmine>
 {
     public override Colour4 TextColor => Theme.Text;
     private Drawable landminePiece;
 
-    public EditorLandmine(HitObject hit)
+    public EditorLandmine(Landmine hit)
         : base(hit)
     {
     }
 
-    protected override IEnumerable<Drawable> CreateContent() => new[]
-    {
-        landminePiece = new DefaultLandmine().With(d => d.RelativeSizeAxes = Axes.X)
-    };
+    protected override IEnumerable<Drawable> CreateContent()
+        => [landminePiece = new DefaultLandmine().With(d => d.RelativeSizeAxes = Axes.X)];
 
     protected override void Update()
     {

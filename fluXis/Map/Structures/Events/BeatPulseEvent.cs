@@ -7,10 +7,12 @@ using Midori.Utils.Extensions;
 using Newtonsoft.Json;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using rhym;
 
 namespace fluXis.Map.Structures.Events;
 
 [Description("Zooms in and out to the beat of the song.")]
+[ResourceLocation("flux:events/beatpulse")]
 public class BeatPulseEvent : IMapEvent
 {
     [JsonProperty("time")]

@@ -4,6 +4,7 @@ using fluXis.Map;
 using fluXis.Map.Structures;
 using fluXis.Modes.Gameplay.Lines;
 using fluXis.Modes.Gameplay.Objects;
+using fluXis.Modes.Keys.Map.Objects;
 using fluXis.Modes.Keys.Map.Objects.Drawable;
 using fluXis.Screens.Gameplay.Ruleset;
 using osu.Framework.Extensions.IEnumerableExtensions;
@@ -22,17 +23,17 @@ public partial class KeysHitObjectManager : GameModeHitObjectManager
     {
         get
         {
-            var speed = Playfield.RealmMap.Settings.ScrollSpeed ?? Ruleset.ScrollSpeed.Value;
+            var speed = Map.Settings.ScrollSpeed ?? Ruleset.ScrollSpeed.Value;
             return speed / Ruleset.Rate;
         }
     }
 
     public virtual float HitPosition => (NestedManagers.FirstOrDefault() as KeysHitObjectColumn)?.HitPosition ?? DrawHeight;
 
-    public int KeyCount => Map.RealmEntry!.KeyCount;
+    public int KeyCount => (Ruleset.PlayableMode as KeysPlayableGameMode)!.KeyCount;
 
-    public KeysHitObjectManager(RulesetContainer ruleset, MapInfo map, MapEvents events, IEnumerable<HitObject> objs, bool nested = false)
-        : base(ruleset, map, events)
+    public KeysHitObjectManager(RulesetContainer ruleset, PlayableMap map, IEnumerable<HitObject> objs, bool nested = false)
+        : base(ruleset, map)
     {
         RelativeSizeAxes = Axes.Y;
         DefaultScrollGroup = ruleset.ScrollGroups["$1"];
@@ -46,12 +47,12 @@ public partial class KeysHitObjectManager : GameModeHitObjectManager
             var grouped = objs.GroupBy(x => x.Lane).OrderBy(x => x.Key).ToArray();
             grouped.ForEach(g =>
             {
-                var manager = new KeysHitObjectColumn(ruleset, Map, Events, g.Key, g);
+                var manager = new KeysHitObjectColumn(ruleset, Map, g.Key, g);
                 AddNestedManager(manager);
                 AddInternal(manager);
             });
 
-            FutureObjects.AddRange(TimingLineGenerator.Generate(map.TimingPoints, map.EndTime));
+            FutureObjects.AddRange(TimingLineGenerator.Generate(map.ObjectsOfType<TimingPoint>(), map.EndTime));
         }
     }
 
@@ -65,9 +66,9 @@ public partial class KeysHitObjectManager : GameModeHitObjectManager
 
     protected override DrawableHitObject? CreateDrawableFor(HitObject obj) => obj switch
     {
+        Note note => new DrawableNote(note),
+        Tick tick => new DrawableTick(tick),
         TimingLine line => new KeysDrawableTimingLine(line),
-        { Type: HitObjectType.Normal, LongNote: false } => new DrawableNote(obj),
-        { Type: HitObjectType.Tick } => new DrawableTick(obj),
         _ => null
     };
 

@@ -21,7 +21,7 @@ public class DrainHealthProcessor : HealthProcessor
     {
     }
 
-    public override void ApplyMap(MapInfo map)
+    public override void ApplyMap(PlayableMap map)
     {
         base.ApplyMap(map);
         maxCombo = map.MaxCombo;

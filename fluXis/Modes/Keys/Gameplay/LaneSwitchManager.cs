@@ -18,7 +18,7 @@ public partial class LaneSwitchManager : CompositeComponent
 
     public override bool RemoveCompletedTransforms => false;
 
-    private List<LaneSwitchEvent> events { get; set; }
+    private LaneSwitchEvent[] events { get; set; }
     private int keycount { get; set; }
     private bool newLayout { get; set; }
     private bool mirror { get; }
@@ -28,7 +28,7 @@ public partial class LaneSwitchManager : CompositeComponent
     public float HitPosition { get; private set; }
     public float ReceptorOffset { get; private set; }
 
-    public LaneSwitchManager(List<LaneSwitchEvent> events, int keycount, bool newLayout, bool mirror)
+    public LaneSwitchManager(LaneSwitchEvent[] events, int keycount, bool newLayout, bool mirror)
     {
         this.newLayout = newLayout;
         this.events = events;
@@ -38,14 +38,6 @@ public partial class LaneSwitchManager : CompositeComponent
 
     [BackgroundDependencyLoader]
     private void load() => build();
-
-    public void Rebuild(List<LaneSwitchEvent> events, int keycount, bool newLayout)
-    {
-        this.events = events;
-        this.keycount = keycount;
-        this.newLayout = newLayout;
-        build();
-    }
 
     public float WidthFor(int lane) => getLane(lane).Width;
 

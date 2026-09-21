@@ -27,8 +27,8 @@ public partial class EditorLoader : FluXisScreen
     [Resolved(CanBeNull = true)]
     private GlobalClock clock { get; set; }
 
-    private RealmMap map { get; set; }
-    private MapInfo mapInfo { get; set; }
+    private RealmMap dbMap { get; set; }
+    private PlayableMap map { get; set; }
 
     /// <summary>
     /// see <see cref="Editor.StartTabIndex"/>
@@ -43,10 +43,10 @@ public partial class EditorLoader : FluXisScreen
 
     private CircularContainer circle;
 
-    public EditorLoader(RealmMap realmMap = null, MapInfo map = null)
+    public EditorLoader(RealmMap dbMap = null, PlayableMap map = null)
     {
-        this.map = realmMap;
-        mapInfo = map;
+        this.dbMap = dbMap;
+        this.map = map;
     }
 
     [BackgroundDependencyLoader]
@@ -80,14 +80,14 @@ public partial class EditorLoader : FluXisScreen
         pushEditor();
     }
 
-    public void CreateNewDifficulty(RealmMap realmMap, MapInfo refInfo, CreateNewMapParameters param)
+    public void CreateNewDifficulty(RealmMap realmMap, PlayableMap refInfo, CreateNewMapParameters param)
     {
         switching = true;
         this.MakeCurrent();
 
         var set = maps.GetFromGuid(realmMap.MapSet.ID);
-        map = maps.CreateNewDifficulty(set, realmMap, refInfo, param);
-        mapInfo = map.GetMapInfo();
+        dbMap = maps.CreateNewDifficulty(set, realmMap, refInfo, param);
+        map = dbMap.GetPlayable(Game.GameModes);
 
         pushEditor();
     }
@@ -97,24 +97,16 @@ public partial class EditorLoader : FluXisScreen
         switching = true;
         this.MakeCurrent();
 
-        map = realmMap;
-        mapInfo = map.GetMapInfo();
+        dbMap = realmMap;
+        map = dbMap.GetPlayable(Game.GameModes);
 
         pushEditor();
     }
 
     private void pushEditor() => Task.Run(() =>
     {
-        var editorMap = map?.GetMapInfo<EditorMap.EditorMapInfo>();
-        var events = mapInfo?.GetMapEvents();
-        var sb = mapInfo?.GetStoryboard();
-
-        if (editorMap != null && events != null)
-            editorMap.MapEvents = events;
-        if (editorMap != null && sb != null)
-            editorMap.Storyboard = sb;
-
-        Schedule(() => LoadComponentAsync(new Editor(this, map, editorMap) { StartTabIndex = StartTabIndex }, s => this.Delay(DURATION).FadeIn().OnComplete(_ => this.Push(s))));
+        var editorMap = dbMap?.GetPlayable(Game.GameModes);
+        Schedule(() => LoadComponentAsync(new Editor(this, dbMap, editorMap) { StartTabIndex = StartTabIndex }, s => this.Delay(DURATION).FadeIn().OnComplete(_ => this.Push(s))));
         switching = false;
     });
 

@@ -12,6 +12,9 @@ public class RawMapProperties
     [YamlMember(Alias = "flux:difficulty_health")]
     public float HealthDifficulty { get; set; } = 8;
 
+    [YamlMember(Alias = "flux:audio_visualizations")]
+    public bool AudioVisualizations { get; set; }
+
     [YamlMember(Alias = "flux:dual")]
     public DualMode Dual { get; set; } = DualMode.Disabled;
 

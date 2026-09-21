@@ -12,11 +12,13 @@ using Midori.Utils.Extensions;
 using Newtonsoft.Json;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using rhym;
 
 namespace fluXis.Map.Structures.Events;
 
 [Description("A pulsating border around the screen.")]
 [Icon(FluXisIconType.Pulse)]
+[ResourceLocation("flux:events/pulse")]
 public class PulseEvent : IMapEvent, IHasDuration, IHasEasing
 {
     [JsonProperty("time")]

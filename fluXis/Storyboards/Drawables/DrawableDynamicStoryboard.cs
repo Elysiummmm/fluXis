@@ -38,7 +38,7 @@ public partial class DrawableDynamicStoryboard : DrawableStoryboard
     private HashSet<ScriptState> pendingStates { get; } = new();
     private List<ScriptState> scripts { get; } = new();
 
-    public DrawableDynamicStoryboard(Bindable<MapInfo> map, Bindable<Storyboard> storyboard, string assetPath)
+    public DrawableDynamicStoryboard(Bindable<PlayableMap> map, Bindable<Storyboard> storyboard, string assetPath)
         : base(map.Value, storyboard.Value.JsonCopy(), assetPath)
     {
         BindableStoryboard = storyboard;

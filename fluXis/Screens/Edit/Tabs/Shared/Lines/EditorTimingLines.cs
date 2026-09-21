@@ -92,16 +92,16 @@ public abstract partial class EditorTimingLines<T> : Container<T>
 
     private void createLines()
     {
-        var points = map.MapInfo.TimingPoints;
+        var points = map.Playable.ObjectsOfType<TimingPoint>();
 
-        for (int i = 0; i < points.Count; i++)
+        for (int i = 0; i < points.Length; i++)
         {
             var point = points[i];
 
             if (point.Signature == 0)
                 continue;
 
-            var target = i + 1 < points.Count ? points[i + 1].Time : EditorClock.TrackLength;
+            var target = i + 1 < points.Length ? points[i + 1].Time : EditorClock.TrackLength;
             var increase = point.MsPerBeat / Settings.SnapDivisor;
 
             if (increase < .1f)

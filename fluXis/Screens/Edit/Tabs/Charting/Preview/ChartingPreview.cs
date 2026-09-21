@@ -20,7 +20,6 @@ using fluXis.Screens.Gameplay.Replays;
 using fluXis.Screens.Gameplay.Ruleset;
 using fluXis.Storyboards;
 using fluXis.Utils;
-using Midori.Utils;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
@@ -49,7 +48,8 @@ public partial class ChartingPreview : DrawSizePreservingFillContainer
     [Resolved]
     protected EditorMap Map { get; private set; } = null!;
 
-    private MapEvents? cachedEvents;
+    // private LegacyMapEvents? cachedEvents;
+    private PlayableMap? cachedMap;
 
     private IdleTracker idleTracker = null!;
     private Bindable<float> userScrollSpeed = null!;
@@ -91,14 +91,14 @@ public partial class ChartingPreview : DrawSizePreservingFillContainer
         Anchor = Anchor.Centre;
         Origin = Anchor.Centre;
 
-        var compiled = getCompiledEvents();
+        var map = getCompiledMap();
 
-        Camera = new CameraContainer([.. Map.MapEvents.Where(x => x is ICameraEvent).Cast<ICameraEvent>()]) { Clock = EditorClock };
+        Camera = new CameraContainer([.. map.ObjectsOfType<ICameraEvent>()]) { Clock = EditorClock };
 
         Container pulseContainer;
 
-        Children = new Drawable[]
-        {
+        Children =
+        [
             new Box { RelativeSizeAxes = Axes.Both, Colour = Theme.Background2 },
             idleTracker = new IdleTracker(400, rebuildRuleset, () =>
             {
@@ -107,7 +107,7 @@ public partial class ChartingPreview : DrawSizePreservingFillContainer
             }),
             handler = new PreviewShaderHandler
             {
-                ShaderEvents = compiled.ShaderEvents
+                ShaderEvents = map.ObjectsOfType<ShaderEvent>()
             },
 
             Camera.CreateProxyDrawable().With(x => x.Clock = EditorClock),
@@ -138,7 +138,7 @@ public partial class ChartingPreview : DrawSizePreservingFillContainer
                         rulesetWrapper = new Container { RelativeSizeAxes = Axes.Both },
                         new PreviewOverlay { Preview = this } // Moved overlay here
                     }),
-                    pulseEffect = new PulseEffect(compiled.PulseEvents) { Clock = EditorClock },
+                    pulseEffect = new PulseEffect(map.ObjectsOfType<PulseEvent>()) { Clock = EditorClock },
                     frontFlash = new PreviewFlashLayer { Clock = EditorClock }
                 ])
             },
@@ -149,9 +149,9 @@ public partial class ChartingPreview : DrawSizePreservingFillContainer
                 Anchor = Anchor.Centre,
                 Origin = Anchor.Centre
             }
-        };
+        ];
 
-        beatPulseManager = new BeatPulseManager(Map.MapInfo, compiled.BeatPulseEvents, pulseContainer) { Clock = EditorClock };
+        beatPulseManager = new BeatPulseManager(map, map.ObjectsOfType<BeatPulseEvent>(), pulseContainer) { Clock = EditorClock };
         AddInternal(beatPulseManager);
     }
 
@@ -159,7 +159,7 @@ public partial class ChartingPreview : DrawSizePreservingFillContainer
     {
         base.LoadComplete();
 
-        backgroundVideo.LoadVideo(Map.MapInfo);
+        backgroundVideo.LoadVideo(Map.Playable);
         backgroundVideo.Start();
 
         Editor.BindableBackgroundDim.BindValueChanged(e => backgroundDim.FadeTo(e.NewValue, 300));
@@ -227,7 +227,16 @@ public partial class ChartingPreview : DrawSizePreservingFillContainer
 
     #region Compilation
 
-    private MapEvents getCompiledEvents()
+    // TODO: this doesn't to anything
+    private PlayableMap getCompiledMap()
+    {
+        if (cachedMap != null)
+            return cachedMap;
+
+        return cachedMap = Map.Playable;
+    }
+
+    /*private LegacyMapEvents getCompiledEvents()
     {
         if (cachedEvents != null)
             return cachedEvents;
@@ -239,9 +248,9 @@ public partial class ChartingPreview : DrawSizePreservingFillContainer
         effects.Compile();
         effects.Sort();
         return cachedEvents = effects;
-    }
+    }*/
 
-    private void invalidateCompiled() => cachedEvents = null;
+    private void invalidateCompiled() => cachedMap = null;
 
     #endregion
 
@@ -254,8 +263,8 @@ public partial class ChartingPreview : DrawSizePreservingFillContainer
     {
         shaders = new ShaderStackContainer { Clock = EditorClock };
 
-        var compiled = getCompiledEvents();
-        var shaderTypes = compiled.ShaderEvents.Select(x => x.Type).Distinct();
+        var compiled = getCompiledMap();
+        var shaderTypes = compiled.ObjectsOfType<ShaderEvent>().Select(x => x.Type).Distinct();
 
         rebuildShaders(shaderTypes);
 
@@ -266,10 +275,10 @@ public partial class ChartingPreview : DrawSizePreservingFillContainer
     private void checkShaderRebuild(bool force = false)
     {
         var current = shaders.ShaderTypes;
-        var compiled = getCompiledEvents();
-        var shaderTypes = compiled.ShaderEvents.Select(x => x.Type).Distinct();
-
-        handler.ShaderEvents = compiled.ShaderEvents;
+        var compiled = getCompiledMap();
+        var events = compiled.ObjectsOfType<ShaderEvent>();
+        var shaderTypes = events.Select(x => x.Type).Distinct();
+        handler.ShaderEvents = events;
 
         var shaderTypesArr = shaderTypes as ShaderType[] ?? [.. shaderTypes];
         if (!current.SequenceEqual(shaderTypesArr) || force)
@@ -307,15 +316,17 @@ public partial class ChartingPreview : DrawSizePreservingFillContainer
 
     private RulesetContainer createRuleset()
     {
-        var effects = Map.MapEvents.JsonCopy()!;
+        // TODO: loop compilation and copying
+        /*var effects = Map.MapEvents.JsonCopy()!;
         effects.Compile();
-        effects.Sort();
+        effects.Sort();*/
 
-        backFlash.Rebuild(effects.FlashEvents.Where(x => x.InBackground).ToList());
-        frontFlash.Rebuild(effects.FlashEvents.Where(x => !x.InBackground).ToList());
+        var flashes = Map.Playable.ObjectsOfType<FlashEvent>();
+        backFlash.Rebuild(flashes.Where(x => x.InBackground));
+        frontFlash.Rebuild(flashes.Where(x => !x.InBackground));
 
-        var auto = new AutoGenerator(Map.MapInfo, Map.RealmMap.KeyCount);
-        var container = new ReplayRulesetContainer(Editor.GameMode, auto.Generate(), Map.MapInfo, effects, [new NoFailMod()]);
+        var auto = new AutoGenerator(Map.Playable, Map.RealmMap.KeyCount);
+        var container = new ReplayRulesetContainer(Editor.GameMode, auto.Generate(), Map.Playable, [new NoFailMod()]);
         container.ScrollSpeed = Settings.ApplyZoomToPreview.Value ? zoomedScrollSpeed : userScrollSpeed;
         container.ParentClock = EditorClock;
         return container;
@@ -329,7 +340,7 @@ public partial class ChartingPreview : DrawSizePreservingFillContainer
 
     private void rebuildCamera()
     {
-        var events = getCompiledEvents().Where(x => x is ICameraEvent).Cast<ICameraEvent>().ToList();
+        var events = getCompiledMap().ObjectsOfType<ICameraEvent>().ToArray();
         Camera.Refresh(events);
     }
 
@@ -339,12 +350,16 @@ public partial class ChartingPreview : DrawSizePreservingFillContainer
 
     private void rebuildPulseEffect()
     {
-        pulseEffect.Pulses = getCompiledEvents().PulseEvents;
-        pulseEffect.Rebuild();
+        // TODO
+        // pulseEffect.Pulses = getCompiledEvents().PulseEvents;
+        // pulseEffect.Rebuild();
     }
 
-    private void rebuildBeatPulse() =>
-        beatPulseManager.Rebuild(getCompiledEvents().BeatPulseEvents);
+    private void rebuildBeatPulse()
+    {
+        // TODO
+        // beatPulseManager.Rebuild(getCompiledEvents().BeatPulseEvents);
+    }
 
     private void rebuildAllCompiled(bool force = false)
     {

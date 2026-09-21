@@ -5,7 +5,7 @@ using System.Linq;
 using fluXis.Database;
 using fluXis.Database.Maps;
 using fluXis.Map.Structures;
-using fluXis.Mods;
+using fluXis.Map.Structures.Events;
 using fluXis.Online.API.Models.Maps;
 using fluXis.Storyboards;
 using fluXis.Storyboards.Drawables;
@@ -13,11 +13,11 @@ using fluXis.Utils;
 using JetBrains.Annotations;
 using Midori.Utils;
 using Newtonsoft.Json;
-using rhym;
 
-namespace fluXis.Map;
+namespace fluXis.Map.Format.Legacy;
 
-public class MapInfo
+#pragma warning disable CS0612 // Type or member is obsolete
+public class LegacyMapJson
 {
     public static int MinKeymode { get; set; } = 1;
     public static int MaxKeymode { get; set; } = -1; // allow anything
@@ -30,22 +30,19 @@ public class MapInfo
     public string StoryboardFile { get; set; } = string.Empty;
 
     [JsonProperty("metadata")]
-    public MapMetadata Metadata { get; set; }
+    public LegacyMapMetadata Metadata { get; set; }
 
     [JsonProperty("colors")]
-    public MapColors Colors { get; set; } = new();
+    public LegacyMapColors Colors { get; set; } = new();
 
-    public List<HitObject> HitObjects { get; set; }
-    public List<TimingPoint> TimingPoints { get; set; }
-    public List<ScrollVelocity> ScrollVelocities { get; set; }
+    // ReSharper disable CollectionNeverUpdated.Global
+    public List<LegacyHitObject> HitObjects { get; init; }
+    public List<TimingPoint> TimingPoints { get; init; }
+    public List<ScrollVelocity> ScrollVelocities { get; init; }
     public List<HitSoundFade> HitSoundFades { get; set; }
 
     public float AccuracyDifficulty { get; set; } = 8;
     public float HealthDifficulty { get; set; } = 8;
-
-    [JsonProperty("mode")]
-    [JsonConverter(typeof(JsonResourceLocationConverter))]
-    public ResourceLocation GameMode { get; set; } = new("flustix", "keys");
 
     [JsonProperty("dual")]
     public DualMode DualMode { get; set; } = DualMode.Disabled;
@@ -76,31 +73,7 @@ public class MapInfo
     public bool IsSplit => DualMode == DualMode.Separate;
 
     [JsonIgnore]
-    public double StartTime => HitObjects[0].Time;
-
-    [JsonIgnore]
     public double EndTime => HitObjects.Count == 0 ? 1000 : HitObjects[^1].EndTime;
-
-    [JsonIgnore]
-    public int MaxCombo
-    {
-        get
-        {
-            int maxCombo = 0;
-
-            foreach (var hitObject in HitObjects)
-            {
-                maxCombo++;
-                if (hitObject.LongNote)
-                    maxCombo++;
-            }
-
-            return maxCombo;
-        }
-    }
-
-    [JsonIgnore]
-    public int InitialKeyCount { get; set; }
 
     [CanBeNull]
     [JsonIgnore]
@@ -134,16 +107,16 @@ public class MapInfo
 
     #endregion
 
-    public MapInfo(MapMetadata metadata)
+    public LegacyMapJson(LegacyMapMetadata metadata)
         : this()
     {
         Metadata = metadata;
     }
 
-    public MapInfo()
+    public LegacyMapJson()
     {
-        Metadata = new MapMetadata();
-        HitObjects = new List<HitObject>();
+        Metadata = new LegacyMapMetadata();
+        HitObjects = new List<LegacyHitObject>();
         TimingPoints = new List<TimingPoint> { new() { BPM = 120, Time = 0, Signature = 4 } }; // Add default timing point to avoid issues
         ScrollVelocities = new List<ScrollVelocity>();
         HitSoundFades = new List<HitSoundFade>();
@@ -196,30 +169,10 @@ public class MapInfo
         return true;
     }
 
-    public void Sort()
-    {
-        HitObjects.Sort((a, b) => a.Time == b.Time ? a.Lane.CompareTo(b.Lane) : a.Time.CompareTo(b.Time));
-        TimingPoints.Sort((a, b) => a.Time.CompareTo(b.Time));
-        ScrollVelocities?.Sort((a, b) => a.Time.CompareTo(b.Time));
-        HitSoundFades?.Sort((a, b) => a.Time.CompareTo(b.Time));
-    }
-
-    public MapEvents GetMapEvents(List<IMod> mods, bool comp)
-    {
-        var events = GetMapEvents<MapEvents>();
-        if (comp) events.Compile();
-
-        foreach (var mod in mods.OfType<IApplicableToEvents>())
-            mod.Apply(events);
-
-        events.Sort();
-        return events;
-    }
-
-    public MapEvents GetMapEvents() => GetMapEvents<MapEvents>();
+    public LegacyMapEvents GetMapEvents() => GetMapEvents<LegacyMapEvents>();
 
     public virtual T GetMapEvents<T>()
-        where T : MapEvents, new()
+        where T : LegacyMapEvents, new()
     {
         var events = new T();
 
@@ -236,7 +189,7 @@ public class MapInfo
 
         var content = File.ReadAllText(MapFiles.GetFullPath(effectFile));
         EffectHash = MapUtils.GetHash(content);
-        return MapEvents.Load<T>(content);
+        return LegacyMapEvents.Load<T>(content);
     }
 
     [CanBeNull]
@@ -278,7 +231,7 @@ public class MapInfo
         if (!Directory.Exists(path))
             return null;
 
-        return new DrawableStoryboard(this, sb, MapFiles.GetFullPath(RealmEntry!.MapSet.ID.ToString()));
+        return new DrawableStoryboard(null, sb, MapFiles.GetFullPath(RealmEntry!.MapSet.ID.ToString()));
     }
 
     [CanBeNull]
@@ -317,3 +270,4 @@ public class MapInfo
 
     public override string ToString() => $"{Hash} - {EffectHash} - {StoryboardHash}";
 }
+#pragma warning restore CS0612 // Type or member is obsolete

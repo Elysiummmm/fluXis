@@ -10,16 +10,17 @@ using osuTK;
 
 namespace fluXis.Screens.Edit.Tabs.Charting.Playfield.Objects.Hits;
 
-public abstract partial class EditorDrawableHitObject : EditorDrawableObject
+public abstract partial class EditorDrawableHitObject<T> : EditorDrawableObject
+    where T : HitObject
 {
-    public new HitObject Data => base.Data as HitObject;
+    public new T Data => base.Data as T;
 
     private FluXisSpriteText sampleText;
 
     // private bool overZero = true;
     // private const int max_distance = 100;
 
-    protected EditorDrawableHitObject(HitObject hit)
+    protected EditorDrawableHitObject(T hit)
         : base(hit)
     {
     }
@@ -60,7 +61,7 @@ public abstract partial class EditorDrawableHitObject : EditorDrawableObject
     {
         base.Update();
 
-        sampleText.Text = Data.HitSound?.Replace(".wav", "") ?? ":normal";
+        sampleText.Text = Data.Sample?.Replace(".wav", "") ?? ":normal";
 
         /*if (Data.Time <= EditorClock.CurrentTime && EditorClock.CurrentTime - Data.Time <= max_distance && overZero)
             Playfield.PlayHitSound(Data);

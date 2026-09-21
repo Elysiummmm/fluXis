@@ -16,12 +16,12 @@ public partial class GameplayClockContainer : Container
 
     private DependencyContainer dependencies;
 
-    public GameplayClockContainer(ITrackStore tracks, RealmMap realmMap, MapInfo info, IEnumerable<Drawable> drawables, bool useOffset = true)
+    public GameplayClockContainer(ITrackStore tracks, RealmMap realmMap, PlayableMap map, IEnumerable<Drawable> drawables, bool useOffset = true)
     {
         RelativeSizeAxes = Axes.Both;
         Anchor = Origin = Anchor.Centre;
 
-        GameplayClock = new GameplayClock(tracks, info, realmMap.GetTrack(), realmMap.Settings.Offset, useOffset);
+        GameplayClock = new GameplayClock(tracks, map, realmMap.GetTrack(), realmMap.Settings.Offset, useOffset);
 
         InternalChildren = new Drawable[]
         {

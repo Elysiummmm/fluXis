@@ -13,9 +13,11 @@ using osu.Framework.Extensions.IEnumerableExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.UserInterface;
+using rhym;
 
 namespace fluXis.Map.Structures.Events;
 
+[ResourceLocation("flux:events/bookmark")]
 public class NoteEvent : IMapEvent, IWithContext
 {
     [JsonProperty("time")]

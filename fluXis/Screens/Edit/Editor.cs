@@ -27,6 +27,7 @@ using fluXis.Graphics.UserInterface.Panel.Types;
 using fluXis.Input;
 using fluXis.Localization;
 using fluXis.Map;
+using fluXis.Map.Structures;
 using fluXis.Map.Structures.Events;
 using fluXis.Modes;
 using fluXis.Online.Activity;
@@ -74,6 +75,7 @@ using osu.Framework.Platform;
 using osu.Framework.Screens;
 using osuTK;
 using osuTK.Input;
+using rhym;
 
 namespace fluXis.Screens.Edit;
 
@@ -129,7 +131,9 @@ public partial class Editor : FluXisScreen, IKeyBindingHandler<FluXisGlobalKeybi
 
     public Bindable<Waveform> Waveform { get; private set; }
     public EditorMap EditorMap { get; private set; }
+
     public GameMode GameMode { get; private set; }
+    public GameModeManager GameModes => Game.GameModes;
 
     public EditorClock EditorClock { get; private set; }
     private EditorSettings settings;
@@ -149,7 +153,6 @@ public partial class Editor : FluXisScreen, IKeyBindingHandler<FluXisGlobalKeybi
     private bool isUploading;
 
     private string lastMapHash;
-    private string lastEffectHash;
     private string lastStoryboardHash;
 
     private bool canSave => EditorMap.RealmMap.StatusInt < 100;
@@ -161,8 +164,7 @@ public partial class Editor : FluXisScreen, IKeyBindingHandler<FluXisGlobalKeybi
             if (!canSave)
                 return false;
 
-            return EditorMap.MapEventsHash != lastEffectHash
-                   || EditorMap.MapInfoHash != lastMapHash
+            return EditorMap.MapInfoHash != lastMapHash
                    || EditorMap.StoryboardHash != lastStoryboardHash;
         }
     }
@@ -182,10 +184,10 @@ public partial class Editor : FluXisScreen, IKeyBindingHandler<FluXisGlobalKeybi
 
     private Bindable<bool> autosave;
 
-    public Editor(EditorLoader loader, RealmMap realmMap = null, EditorMap.EditorMapInfo map = null)
+    public Editor(EditorLoader loader, RealmMap realmMap = null, [CanBeNull] PlayableMap map = null)
     {
         this.loader = loader;
-        EditorMap = new EditorMap(map, realmMap, LoadComponent, Scheduler);
+        EditorMap = new EditorMap(map, realmMap, LoadComponent, Scheduler, this);
     }
 
     [BackgroundDependencyLoader]
@@ -212,11 +214,14 @@ public partial class Editor : FluXisScreen, IKeyBindingHandler<FluXisGlobalKeybi
             EditorMap.RealmMap.MapSet.Resources = resources;
         }
 
-        EditorMap.MapInfo ??= new EditorMap.EditorMapInfo(new MapMetadata { Mapper = EditorMap.RealmMap.Metadata.Mapper }) { NewLaneSwitchLayout = true, RealmEntry = EditorMap.RealmMap };
-        EditorMap.MapInfo.MapEvents ??= new MapEvents();
-        EditorMap.MapInfo.Storyboard ??= new Storyboard { Version = Storyboard.LATEST_VERSION };
+        EditorMap.Playable ??= new PlayableMap(new NativeStorage(EditorMap.RealmMap.MapSet.GetPathForFile("")), new ResourceLocation("flux", "keys/4"))
+        {
+            Creator = EditorMap.RealmMap.Metadata.Mapper
+        };
 
-        GameMode = modes.Find(EditorMap.MapInfo.GameMode) ?? throw GameModeManager.FailedToLoadException();
+        EditorMap.Playable.Storyboard ??= new Storyboard { Version = Storyboard.LATEST_VERSION };
+
+        GameMode = modes.Find(EditorMap.Playable.Mode) ?? throw GameModeManager.FailedToLoadException();
 
         EditorMap.SetupWatcher();
         EditorMap.SetupNotifiers();
@@ -230,7 +235,7 @@ public partial class Editor : FluXisScreen, IKeyBindingHandler<FluXisGlobalKeybi
         dependencies.CacheAs(keybinds);
 
         dependencies.CacheAs(EditorMap);
-        dependencies.CacheAs<ICustomColorProvider>(EditorMap.MapInfo.Colors);
+        dependencies.CacheAs<ICustomColorProvider>(new MapColorProvider(EditorMap.Playable.Colors));
         dependencies.CacheAs(Waveform = new Bindable<Waveform>());
         dependencies.CacheAs(actionStack = new EditorActionStack(EditorMap) { NotificationManager = notifications });
         dependencies.CacheAs(modding = new EditorModding());
@@ -238,7 +243,7 @@ public partial class Editor : FluXisScreen, IKeyBindingHandler<FluXisGlobalKeybi
 
         updateStateHash();
 
-        EditorClock = new EditorClock(EditorMap.MapInfo) { SnapDivisor = settings.SnapDivisorBindable };
+        EditorClock = new EditorClock(EditorMap.Playable) { SnapDivisor = settings.SnapDivisorBindable };
         EditorClock.ChangeSource(loadMapTrack());
         dependencies.CacheAs(EditorClock);
         dependencies.CacheAs<IBeatSyncProvider>(EditorClock);
@@ -275,7 +280,7 @@ public partial class Editor : FluXisScreen, IKeyBindingHandler<FluXisGlobalKeybi
             highPass = new AudioFilter(audioManager.TrackMixer, BQFType.HighPass),
             EditorClock,
             modding,
-            dependencies.CacheAsAndReturn(new Hitsounding(EditorMap.RealmMap.MapSet, EditorMap.MapInfo.HitSoundFades, EditorClock.RateBindable)
+            dependencies.CacheAsAndReturn(new Hitsounding(EditorMap.RealmMap.MapSet, EditorMap.Playable.ObjectsOfType<HitSoundFade>(), EditorClock.RateBindable)
             {
                 DirectVolume = true,
                 Clock = EditorClock
@@ -388,7 +393,7 @@ public partial class Editor : FluXisScreen, IKeyBindingHandler<FluXisGlobalKeybi
                                 {
                                     new MenuActionItem("Set preview point to current time", Phosphor.Bold.Timer, () =>
                                     {
-                                        EditorMap.MapInfo.Metadata.PreviewTime
+                                        EditorMap.Playable.PreviewTime
                                             = EditorMap.RealmMap.Metadata.PreviewTime
                                                 = (int)EditorClock.CurrentTime;
                                     })
@@ -419,7 +424,7 @@ public partial class Editor : FluXisScreen, IKeyBindingHandler<FluXisGlobalKeybi
             },
             keymapOverlay = new EditorKeymapOverlay(keybinds),
             dependencies.CacheAsAndReturn(osd = new EditorOsd()),
-            dependencies.CacheAsAndReturn(new EditorVariableWaveform(EditorMap.MapInfo.TimingPoints.FirstOrDefault())
+            dependencies.CacheAsAndReturn(new EditorVariableWaveform(EditorMap.Playable.GetTimingPoint(0))
             {
                 Alpha = 0,
                 AlwaysPresent = true,
@@ -459,7 +464,6 @@ public partial class Editor : FluXisScreen, IKeyBindingHandler<FluXisGlobalKeybi
     private void updateStateHash()
     {
         lastMapHash = EditorMap.MapInfoHash;
-        lastEffectHash = EditorMap.MapEventsHash;
         lastStoryboardHash = EditorMap.StoryboardHash;
     }
 
@@ -478,7 +482,7 @@ public partial class Editor : FluXisScreen, IKeyBindingHandler<FluXisGlobalKeybi
             return;
 
         panels.Content.Hide();
-        loader.CreateNewDifficulty(EditorMap.RealmMap, EditorMap.MapInfo, param);
+        loader.CreateNewDifficulty(EditorMap.RealmMap, EditorMap.Playable, param);
 
         bool diffExists(string name)
         {
@@ -610,7 +614,7 @@ public partial class Editor : FluXisScreen, IKeyBindingHandler<FluXisGlobalKeybi
         var sb = new StringBuilder();
         var extended = false;
 
-        foreach (var ev in EditorMap.MapEvents.NoteEvents)
+        foreach (var ev in EditorMap.Playable.ObjectsOfType<NoteEvent>())
         {
             var time = TimeUtils.Format(ev.Time);
             var text = ev.Content ?? string.Empty;
@@ -643,7 +647,7 @@ public partial class Editor : FluXisScreen, IKeyBindingHandler<FluXisGlobalKeybi
             {
                 var lines = File.ReadAllLines(f.FullName);
 
-                EditorMap.MapEvents.NoteEvents.ToList().ForEach(x => EditorMap.Remove(x));
+                EditorMap.Playable.ObjectsOfType<NoteEvent>().ToList().ForEach(x => EditorMap.Remove(x));
 
                 foreach (var line in lines)
                 {
@@ -725,8 +729,8 @@ public partial class Editor : FluXisScreen, IKeyBindingHandler<FluXisGlobalKeybi
             var accurate = EditorClock.CurrentTimeAccurate;
 
             var note = direction > 0
-                ? EditorMap.MapEvents.NoteEvents.FirstOrDefault(n => n.Time > accurate)
-                : EditorMap.MapEvents.NoteEvents.LastOrDefault(n => n.Time < accurate - 1000);
+                ? EditorMap.Playable.ObjectsOfType<NoteEvent>().FirstOrDefault(n => n.Time > accurate)
+                : EditorMap.Playable.ObjectsOfType<NoteEvent>().LastOrDefault(n => n.Time < accurate - 1000);
 
             if (note is not null)
                 EditorClock.SeekSmoothly(note.Time);
@@ -840,13 +844,13 @@ public partial class Editor : FluXisScreen, IKeyBindingHandler<FluXisGlobalKeybi
             return false;
         }
 
-        if (EditorMap.MapInfo.TimingPoints.Count == 0)
+        if (EditorMap.Playable.ObjectsOfType<TimingPoint>().Length == 0)
         {
             notifications.SendError("Map has no timing points!");
             return false;
         }
 
-        EditorMap.Sort();
+        EditorMap.Playable.Sort();
 
         if (!HasUnsavedChanges)
         {
@@ -857,9 +861,9 @@ public partial class Editor : FluXisScreen, IKeyBindingHandler<FluXisGlobalKeybi
         EditorMap.ScriptWatcher.Disable();
 
         var now = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-        EditorMap.MapInfo.TimeInEditor += now - lastSaveTime;
+        EditorMap.Playable.TimeInEditor += now - lastSaveTime;
 
-        mapStore.Save(EditorMap.RealmMap, EditorMap.MapInfo, EditorMap.MapEvents, EditorMap.Storyboard, setStatus);
+        mapStore.Save(EditorMap.RealmMap, EditorMap.Playable, EditorMap.Storyboard, setStatus);
         Scheduler.ScheduleOnceIfNeeded(() => mapStore.UpdateMapSet(mapStore.GetFromGuid(EditorMap.MapSet.ID), EditorMap.MapSet));
 
         isNewMap = false;
@@ -877,7 +881,7 @@ public partial class Editor : FluXisScreen, IKeyBindingHandler<FluXisGlobalKeybi
 
         mapStore.Export(EditorMap.MapSet, new TaskNotificationData
         {
-            Text = $"{EditorMap.MapInfo.Metadata.Title} - {EditorMap.MapInfo.Metadata.Artist}",
+            Text = $"{EditorMap.Playable.Title} - {EditorMap.Playable.Artist}",
             TextWorking = "Exporting..."
         });
     }
@@ -960,8 +964,8 @@ public partial class Editor : FluXisScreen, IKeyBindingHandler<FluXisGlobalKeybi
             var req = new MapLookupRequest
             {
                 MapperID = api.User.Value.ID,
-                Title = EditorMap.MapInfo.Metadata.Title,
-                Artist = EditorMap.MapInfo.Metadata.Artist
+                Title = EditorMap.Playable.Title,
+                Artist = EditorMap.Playable.Artist
             };
             req.Failure += _ => run(); // just run the upload if the request fails
 
@@ -1034,7 +1038,7 @@ public partial class Editor : FluXisScreen, IKeyBindingHandler<FluXisGlobalKeybi
             {
                 overlay.SubText = $"Checking for issues in '{map.Difficulty}'...";
 
-                var results = verifyTab.RunVerify(new BasicVerifyContext(map, LoadComponent));
+                var results = verifyTab.RunVerify(new BasicVerifyContext(map, Game.GameModes, LoadComponent));
                 files[map.Difficulty] = results.ProblematicIssues;
             }
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿/*
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using fluXis.Map;
@@ -46,7 +47,7 @@ public partial class HitObjectColumn : Container<DrawableHitObject>
         }
     }
 
-    public MapInfo Map { get; }
+    public PlayableMap Map { get; }
     public HitObjectManager HitManager { get; }
     public int Lane { get; }
 
@@ -58,7 +59,7 @@ public partial class HitObjectColumn : Container<DrawableHitObject>
     private JudgementProcessor judgementProcessor => player.JudgementProcessor;
     private DependencyContainer dependencies;
 
-    public HitObjectColumn(MapInfo map, RulesetContainer ruleset, HitObjectManager hitManager, int lane)
+    public HitObjectColumn(PlayableMap map, RulesetContainer ruleset, HitObjectManager hitManager, int lane)
     {
         Map = map;
         Lane = lane;
@@ -302,3 +303,4 @@ public partial class HitObjectColumn : Container<DrawableHitObject>
     protected override IReadOnlyDependencyContainer CreateChildDependencies(IReadOnlyDependencyContainer parent)
         => dependencies = new DependencyContainer(base.CreateChildDependencies(parent));
 }
+*/

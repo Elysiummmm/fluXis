@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using fluXis.Map.Structures;
 
 namespace fluXis.Screens.Edit.Tabs.Verify.Checks.HitObjects;
 
@@ -7,8 +8,8 @@ public class EmptyColumnsCheck : IVerifyCheck
 {
     public IEnumerable<VerifyIssue> Check(IVerifyContext ctx)
     {
-        var hits = ctx.MapInfo.HitObjects;
-        if (hits.Count == 0) yield break;
+        var hits = ctx.Map.ObjectsOfType<HitObject>();
+        if (hits.Length == 0) yield break;
 
         var count = ctx.MaxKeyCount;
 

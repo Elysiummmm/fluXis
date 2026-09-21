@@ -11,10 +11,10 @@ public interface IHasDuration : ITimedObject
     double Duration { get; set; }
 
     static EditorVariableLength<IHasDuration> CreateVariableDuration(ObjectProperty _, IHasDuration obj, EditorInspectContext ctx)
-        => new(ctx.Map, obj, ctx.Map.MapInfo.GetTimingPoint(obj.Time).MsPerBeat) { UpdateMap = ctx.Update };
+        => new(ctx.Map, obj, ctx.Map.Playable.GetTimingPoint(obj.Time).MsPerBeat) { UpdateMap = ctx.Update };
 }
 
 public static class HasDurationExtensions
 {
-    public static double GetEndTime(this IHasDuration dur) => dur.Time + dur.Duration;
+    public static double GetEndTime(this ITimedObject obj) => obj.Time + ((obj as IHasDuration)?.Duration ?? 0);
 }

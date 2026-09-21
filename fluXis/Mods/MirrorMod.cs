@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using fluXis.Graphics.Sprites.Icons;
 using fluXis.Map;
 using osu.Framework.Graphics.Sprites;
@@ -17,11 +16,12 @@ public class MirrorMod : IMod, IApplicableToMap
     public bool Rankable => true;
     public Type[] IncompatibleMods => Array.Empty<Type>();
 
-    public void Apply(MapInfo map)
+    public void Apply(PlayableMap map)
     {
-        var keycount = map.RealmEntry?.KeyCount ?? map.HitObjects.MaxBy(x => x.Lane).Lane;
+        // TODO: move to keys mode
+        /*var keycount = map.RealmEntry?.KeyCount ?? map.HitObjects.MaxBy(x => x.Lane).Lane;
 
         foreach (var hit in map.HitObjects)
-            hit.Lane = keycount - hit.Lane + 1;
+            hit.Lane = keycount - hit.Lane + 1;*/
     }
 }

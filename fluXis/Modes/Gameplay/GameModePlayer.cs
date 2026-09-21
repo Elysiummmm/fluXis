@@ -1,5 +1,4 @@
 using System.Linq;
-using fluXis.Database.Maps;
 using fluXis.Map;
 using fluXis.Online.API.Models.Users;
 using fluXis.Scoring;
@@ -63,13 +62,13 @@ public abstract partial class GameModePlayer : CompositeDrawable, IHUDDependency
             {
                 Player = Ruleset.CurrentPlayer ?? APIUser.Default,
                 HitWindows = Ruleset.HitWindows,
-                MapInfo = Ruleset.MapInfo,
+                Map = Ruleset.Map,
                 Mods = Ruleset.Mods
             }
         ]);
 
         MainPlayfield = CreatePlayfield(PlayerIndex, 0);
-        SubPlayfields = Enumerable.Range(1, Ruleset.MapInfo.ExtraPlayfields).Select(x => CreatePlayfield(PlayerIndex, x)).ToArray();
+        SubPlayfields = Enumerable.Range(1, Ruleset.Map.ExtraPlayfields).Select(x => CreatePlayfield(PlayerIndex, x)).ToArray();
 
         var content = new SortingContainer { RelativeSizeAxes = Axes.Both };
         content.Child = MainPlayfield;
@@ -81,7 +80,7 @@ public abstract partial class GameModePlayer : CompositeDrawable, IHUDDependency
     {
         base.LoadComplete();
 
-        JudgementProcessor.ApplyMap(Ruleset.MapInfo);
+        JudgementProcessor.ApplyMap(Ruleset.Map);
         HealthProcessor.OnSavedDeath += () => samples?.EarlyFail();
         ScoreProcessor.OnComboBreak += () =>
         {
@@ -129,8 +128,7 @@ public abstract partial class GameModePlayer : CompositeDrawable, IHUDDependency
 
     RulesetContainer IHUDDependencyProvider.Ruleset => Ruleset;
     HitWindows IHUDDependencyProvider.HitWindows => Ruleset.PlayableMode.HitWindows;
-    RealmMap IHUDDependencyProvider.RealmMap => Ruleset.MapInfo.RealmEntry;
-    MapInfo IHUDDependencyProvider.MapInfo => Ruleset.MapInfo;
+    PlayableMap IHUDDependencyProvider.Map => Ruleset.Map;
     float IHUDDependencyProvider.PlaybackRate => Ruleset.Rate;
     double IHUDDependencyProvider.CurrentTime => Ruleset.Time.Current;
 

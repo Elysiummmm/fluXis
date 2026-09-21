@@ -135,8 +135,6 @@ public partial class FluXisGame : FluXisGameBase, IKeyBindingHandler<FluXisGloba
         loadComponent(sentry, _ => { }, true);
         loadComponent(globalClock = new GlobalClock(), Add, true);
         GameDependencies.CacheAs<IBeatSyncProvider>(globalClock);
-        // TODO: remove this later if we deem GlobalFFTProcessor to be worth being the main amplitude provider
-        // GameDependencies.CacheAs<IAmplitudeProvider>(globalClock);
 
         loadComponent(NotificationManager, Add);
         loadComponent<SpectatorClient>(spectatorClient = new OnlineSpectatorClient(), Add, true);

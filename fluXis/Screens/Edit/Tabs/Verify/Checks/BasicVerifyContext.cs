@@ -1,25 +1,26 @@
 ﻿using System;
 using fluXis.Database.Maps;
 using fluXis.Map;
+using fluXis.Modes;
 using osu.Framework.Graphics;
 
 namespace fluXis.Screens.Edit.Tabs.Verify.Checks;
 
 public class BasicVerifyContext : IVerifyContext
 {
-    public MapInfo MapInfo { get; }
-    public MapEvents MapEvents { get; }
+    public GameModeManager Modes { get; }
+    public PlayableMap Map { get; }
     public RealmMap RealmMap { get; }
 
     private readonly Action<Drawable> loadComponent;
 
-    public BasicVerifyContext(RealmMap map, Action<Drawable> loadComponent)
+    public BasicVerifyContext(RealmMap map, GameModeManager modes, Action<Drawable> loadComponent)
     {
         RealmMap = map;
+        Modes = modes;
         this.loadComponent = loadComponent;
 
-        MapInfo = map.GetMapInfo() ?? throw new InvalidOperationException($"Could not load map file from {map.FileName}!");
-        MapEvents = MapInfo.GetMapEvents();
+        Map = map.GetPlayable(modes) ?? throw new InvalidOperationException($"Could not load map file from {map.FileName}!");
     }
 
     public void LoadComponent(Drawable drawable) => loadComponent.Invoke(drawable);

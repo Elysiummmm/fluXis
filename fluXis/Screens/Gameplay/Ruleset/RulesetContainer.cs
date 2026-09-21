@@ -10,8 +10,6 @@ using fluXis.Mods;
 using fluXis.Online.API.Models.Users;
 using fluXis.Scoring;
 using fluXis.Scoring.Processing.Health;
-using fluXis.Screens.Gameplay.Input;
-using fluXis.Utils.Extensions;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Extensions.IEnumerableExtensions;
@@ -22,15 +20,12 @@ namespace fluXis.Screens.Gameplay.Ruleset;
 
 public partial class RulesetContainer : CompositeDrawable
 {
-    public MapInfo MapInfo { get; }
-    public MapEvents MapEvents { get; }
+    public PlayableMap Map { get; }
     public List<IMod> Mods { get; }
     public APIUser CurrentPlayer { get; init; }
 
     public float Rate { get; }
     public Bindable<float> ScrollSpeed { get; set; } = new(3);
-
-    public GameplayInput Input { get; }
 
     public GameMode Mode { get; }
     public PlayableGameMode PlayableMode { get; }
@@ -58,18 +53,16 @@ public partial class RulesetContainer : CompositeDrawable
 
     protected override bool ForceChildUpdate => true;
 
-    public RulesetContainer(GameMode mode, MapInfo map, MapEvents events, List<IMod> mods)
+    public RulesetContainer(GameMode mode, PlayableMap map, List<IMod> mods)
     {
-        MapInfo = map;
-        MapEvents = events;
+        Map = map;
         Mods = mods;
 
         Mode = mode;
-        PlayableMode = mode.CreatePlayable(this, map, events, [.. mods]);
+        PlayableMode = mode.CreatePlayable(this, map, [.. mods]);
 
         Rate = Mods.OfType<RateMod>().FirstOrDefault()?.Rate ?? 1;
 
-        Input = CreateInput();
         DebugText = new DebugText();
 
         ShakeTarget ??= this;
@@ -87,18 +80,16 @@ public partial class RulesetContainer : CompositeDrawable
 
         InternalChildrenEnumerable = new Drawable[]
         {
-            dependencies.CacheAsAndReturn(Input),
             PlayableMode,
             DebugText
         }.Concat(scrolls.Values.ToArray());
     }
 
-    protected virtual GameplayInput CreateInput() => new(IsPaused.GetBoundCopy(), MapInfo.RealmEntry!.KeyCount, MapInfo.IsDual);
-    public HealthProcessor CreateHealthProcessor() => Mode.CreateHealthProcessor(MapInfo, [.. Mods], Clock, PlayableMode.InBreak, OnDeath);
+    public HealthProcessor CreateHealthProcessor() => Mode.CreateHealthProcessor(Map, [.. Mods], Clock, PlayableMode.InBreak, OnDeath);
 
     private void createHitWindows()
     {
-        var difficulty = Math.Clamp(MapInfo.AccuracyDifficulty == 0 ? 8 : MapInfo.AccuracyDifficulty, 1, 10);
+        var difficulty = Math.Clamp(Map.AccuracyDifficulty == 0 ? 8 : Map.AccuracyDifficulty, 1, 10);
         difficulty *= Mods.Any(m => m is HardMod) ? 1.5f : 1;
 
         HitWindows = new HitWindows(difficulty, Rate);
@@ -109,10 +100,10 @@ public partial class RulesetContainer : CompositeDrawable
     private void createScrollGroups()
     {
         // creating groups
-        for (int i = 0; i < MapInfo.RealmEntry!.KeyCount; i++)
+        for (int i = 0; i < PlayableMode.DefaultGroupCount; i++)
             scrolls[$"${i + 1}"] = new ScrollGroup { Name = $"${i + 1}" };
 
-        var events = MapInfo.ScrollVelocities.Cast<IHasGroups>().Concat(MapEvents.ScrollMultiplyEvents).ToList();
+        var events = Map.ObjectsOfType<IHasGroups>().ToList();
         var groups = events.SelectMany(x => x.Groups).Distinct().Order().ToList();
 
         foreach (var group in groups)

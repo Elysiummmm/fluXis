@@ -1,6 +1,5 @@
 using System.IO;
 using fluXis.Database.Maps;
-using fluXis.Map;
 
 namespace fluXis.Import.Quaver.Map;
 

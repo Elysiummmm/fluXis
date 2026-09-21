@@ -11,6 +11,7 @@ using fluXis.Utils.Attributes;
 using Newtonsoft.Json;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using rhym;
 
 namespace fluXis.Map.Structures.Events.Playfields;
 
@@ -19,6 +20,7 @@ namespace fluXis.Map.Structures.Events.Playfields;
 [AnimatesProperty(nameof(Playfield.AnimationZ))]
 [Description("Moves the playfield.")]
 [Icon(FluXisIconType.PlayfieldMove)]
+[ResourceLocation("flux:events/playfield/move")]
 public class PlayfieldMoveEvent : IMapEvent, IHasDuration, IHasEasing, IApplicableToPlayfield
 {
     [JsonProperty("time")]

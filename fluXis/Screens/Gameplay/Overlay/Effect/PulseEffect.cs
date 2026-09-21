@@ -1,6 +1,6 @@
-using System.Collections.Generic;
 using fluXis.Map.Structures.Events;
 using osu.Framework.Allocation;
+using osu.Framework.Extensions.IEnumerableExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
@@ -12,9 +12,9 @@ public partial class PulseEffect : Container
 {
     public override bool RemoveCompletedTransforms => false;
 
-    public List<PulseEvent> Pulses { get; set; }
+    public PulseEvent[] Pulses { get; set; }
 
-    public PulseEffect(List<PulseEvent> pulses)
+    public PulseEffect(PulseEvent[] pulses)
     {
         Pulses = pulses;
 

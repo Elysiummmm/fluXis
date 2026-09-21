@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using fluXis.Map.Structures;
+using fluXis.Map.Structures.Events;
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 

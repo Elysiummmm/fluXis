@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using fluXis.Import.Quaver.Map.Structs;
 using fluXis.Map;
 using fluXis.Map.Structures;

@@ -55,7 +55,7 @@ public partial class EditorEffectContainer : Container
 
     private void loadEvents()
     {
-        foreach (var laneSwitch in map.MapEvents.LaneSwitchEvents)
+        foreach (var laneSwitch in map.Playable.ObjectsOfType<LaneSwitchEvent>())
             AddLaneSwitch(laneSwitch);
     }
 

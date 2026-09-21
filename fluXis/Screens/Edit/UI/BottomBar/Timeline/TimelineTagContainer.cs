@@ -5,6 +5,7 @@ using fluXis.Map.Structures.Bases;
 using fluXis.Map.Structures.Events;
 using fluXis.Screens.Edit.UI.BottomBar.Timeline.Tags;
 using osu.Framework.Allocation;
+using osu.Framework.Extensions.IEnumerableExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 
@@ -50,14 +51,14 @@ public partial class TimelineTagContainer : Container
         base.LoadComplete();
 
         registerListeners(
-            map.MapInfo.TimingPoints,
+            map.Playable.ObjectsOfType<TimingPoint>(),
             timingPoints,
             tp => new TimelineTimingPointTag(clock, tp),
             t => (TimingPoint)t.TimedObject
         );
 
         registerListeners(
-            map.MapInfo.MapEvents.NoteEvents,
+            map.Playable.ObjectsOfType<NoteEvent>(),
             notePoints,
             n => new TimelineNoteTag(clock, n),
             t => (NoteEvent)t.TimedObject
@@ -72,14 +73,12 @@ public partial class TimelineTagContainer : Container
             return;
 
         deRegisterListeners(
-            map.MapInfo.TimingPoints,
             timingPoints,
             tp => new TimelineTimingPointTag(clock, tp),
             t => (TimingPoint)t.TimedObject
         );
 
         deRegisterListeners(
-            map.MapInfo.MapEvents.NoteEvents,
             notePoints,
             n => new TimelineNoteTag(clock, n),
             t => (NoteEvent)t.TimedObject
@@ -87,7 +86,7 @@ public partial class TimelineTagContainer : Container
     }
 
     private void registerListeners<TObject, TTag>(
-        System.Collections.Generic.List<TObject> items,
+        TObject[] items,
         Container<TTag> container,
         Func<TObject, TTag> f,
         Func<TTag, TObject> getTimedObject)
@@ -101,7 +100,6 @@ public partial class TimelineTagContainer : Container
     }
 
     private void deRegisterListeners<TObject, TTag>(
-        System.Collections.Generic.List<TObject> items,
         Container<TTag> container,
         Func<TObject, TTag> f,
         Func<TTag, TObject> getTimedObject)
@@ -146,7 +144,9 @@ public partial class TimelineTagContainer : Container
 
     private float calculatePosition(double time)
     {
-        if (time == 0) return 0;
+        if (time == 0)
+            return 0;
+
         var x = time / clock.TrackLength;
         return double.IsFinite(x) && !double.IsNaN(x) ? (float)x : 0;
     }

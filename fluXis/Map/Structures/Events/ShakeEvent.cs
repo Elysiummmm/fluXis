@@ -9,11 +9,13 @@ using Midori.Utils.Extensions;
 using Newtonsoft.Json;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using rhym;
 
 namespace fluXis.Map.Structures.Events;
 
 [Description("Shakes the screen.")]
 [Icon(FluXisIconType.Shake)]
+[ResourceLocation("flux:events/shake")]
 public class ShakeEvent : IMapEvent, IHasDuration
 {
     [JsonProperty("time")]

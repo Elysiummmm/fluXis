@@ -8,7 +8,6 @@ using fluXis.Import.Quaver.Map;
 using fluXis.Import.Quaver.Map.Structs;
 using fluXis.Overlay.Notifications;
 using JetBrains.Annotations;
-using Midori.Utils;
 using osu.Framework.Bindables;
 using osu.Framework.Logging;
 using YamlDotNet.Serialization;
@@ -168,7 +167,8 @@ public class QuaverImport : MapImporter
                         LongNoteCount = longNoteCount,
                         NotesPerSecond = (noteCount + longNoteCount) / (songLength / 1000)
                     },
-                    KeyCount = mode switch {
+                    KeyCount = mode switch
+                    {
                         1 => 4,
                         2 => 7,
                         3 => 1,

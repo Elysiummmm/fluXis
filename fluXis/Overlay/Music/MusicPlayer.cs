@@ -402,7 +402,7 @@ public partial class MusicPlayer : OverlayContainer, IKeyBindingHandler<FluXisGl
 
         Task.Run(() =>
         {
-            video.LoadVideo(next.GetMapInfo());
+            video.LoadVideo(next.GetPlayable(game.GameModes));
             ScheduleAfterChildren(video.Start);
         });
     }

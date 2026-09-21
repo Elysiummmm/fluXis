@@ -7,10 +7,13 @@ using fluXis.Screens.Edit.Tabs.Charting.Playfield;
 using Newtonsoft.Json;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using rhym;
+using YamlDotNet.Serialization;
 
 namespace fluXis.Map.Structures.Events.Groups;
 
 [Description("Repeat specific events by group.")]
+[ResourceLocation("flux:events/loop")]
 public class LoopEvent : IMapEvent
 {
     [JsonProperty("time")]
@@ -28,7 +31,7 @@ public class LoopEvent : IMapEvent
     [JsonProperty("count")]
     public int Count { get; set; }
 
-    [JsonIgnore]
+    [JsonIgnore, YamlIgnore]
     string ITimedObject.Group { get; set; }
 
     IEnumerable<Drawable> ITimedObject.CreateObjectOverlay(EditorDrawableObject obj)

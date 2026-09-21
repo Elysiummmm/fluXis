@@ -3,6 +3,7 @@ using System.Linq;
 using fluXis.Audio;
 using fluXis.Audio.Transforms;
 using fluXis.Map;
+using fluXis.Map.Structures;
 using osu.Framework.Audio;
 using osu.Framework.Audio.Track;
 using osu.Framework.Bindables;
@@ -21,7 +22,7 @@ public partial class EditorClock : TransformableClock, IFrameBasedClock, ISource
     public event Action<DrawableTrack> TrackChanged;
     public event Action<double> TimeChanged;
 
-    public MapInfo MapInfo { get; set; }
+    public PlayableMap Map { get; }
     public BindableInt SnapDivisor { get; init; }
 
     public override double ElapsedFrameTime => underlying.ElapsedFrameTime;
@@ -45,9 +46,9 @@ public partial class EditorClock : TransformableClock, IFrameBasedClock, ISource
     private double smoothSeekStartTime;
     private double smoothSeekTime;
 
-    public EditorClock(MapInfo mapInfo)
+    public EditorClock(PlayableMap map)
     {
-        MapInfo = mapInfo;
+        Map = map;
         underlying = new FramedMapClock();
         AddInternal(underlying);
         RateBindable.MinValue = .2f;
@@ -60,7 +61,7 @@ public partial class EditorClock : TransformableClock, IFrameBasedClock, ISource
 
     public void SeekSmoothly(double time)
     {
-        time = Math.Clamp(time, Math.Min(0, MapInfo.TimingPoints.First().Time), TrackLength);
+        time = Math.Clamp(time, Math.Min(0, Map.ObjectsOfType<TimingPoint>().First().Time), TrackLength);
 
         if (IsRunning)
             Seek(time);
@@ -99,14 +100,14 @@ public partial class EditorClock : TransformableClock, IFrameBasedClock, ISource
 
     public double Snap(double position)
     {
-        var point = MapInfo.GetTimingPoint((float)position);
+        var point = Map.GetTimingPoint((float)position);
         float snapLength = point.Signature * point.MsPerBeat / (4 * 4);
         position -= point.Time;
 
         int closest = (int)Math.Round(position / snapLength);
         position = point.Time + closest * snapLength;
 
-        var nextPoint = MapInfo.TimingPoints.FirstOrDefault(x => x.Time > point.Time);
+        var nextPoint = Map.ObjectsOfType<TimingPoint>().FirstOrDefault(x => x.Time > point.Time);
         if (position > nextPoint?.Time)
             position = nextPoint.Time;
 
@@ -137,7 +138,7 @@ public partial class EditorClock : TransformableClock, IFrameBasedClock, ISource
     public override bool Seek(double position)
     {
         ClearTransforms();
-        position = Math.Clamp(position, Math.Min(0, MapInfo.TimingPoints.First().Time), TrackLength);
+        position = Math.Clamp(position, Math.Min(0, Map.ObjectsOfType<TimingPoint>().First().Time), TrackLength);
         var result = underlying.Seek(position);
         TimeChanged?.Invoke(position);
         return result;
@@ -153,15 +154,15 @@ public partial class EditorClock : TransformableClock, IFrameBasedClock, ISource
         if (amount <= 0) return;
 
         double time = CurrentTimeAccurate;
-        var tp = MapInfo.GetTimingPoint((float)time);
+        var tp = Map.GetTimingPoint((float)time);
 
         if (direction < 0 && tp.Time == time)
-            tp = MapInfo.GetTimingPoint((float)(time - 1));
+            tp = Map.GetTimingPoint((float)(time - 1));
 
         double sAmount = tp.MsPerBeat / SnapDivisor.Value * amount;
         double sTime = time + sAmount * direction;
 
-        if (IsRunning || MapInfo.TimingPoints.Count == 0)
+        if (IsRunning || Map.ObjectsOfType<TimingPoint>().Length == 0)
         {
             SeekSmoothly(sTime);
             return;
@@ -175,7 +176,7 @@ public partial class EditorClock : TransformableClock, IFrameBasedClock, ISource
 
         sTime = tp.Time + closest * sAmount;
 
-        var nextTimingPoint = MapInfo.TimingPoints.FirstOrDefault(t => t.Time > tp.Time);
+        var nextTimingPoint = Map.ObjectsOfType<TimingPoint>().FirstOrDefault(t => t.Time > tp.Time);
         if (sTime > nextTimingPoint?.Time)
             sTime = nextTimingPoint.Time;
 
@@ -185,7 +186,7 @@ public partial class EditorClock : TransformableClock, IFrameBasedClock, ISource
             sTime = tp.Time + closest * sAmount;
         }
 
-        if (sTime < tp.Time && !ReferenceEquals(tp, MapInfo.TimingPoints.First()))
+        if (sTime < tp.Time && !ReferenceEquals(tp, Map.ObjectsOfType<TimingPoint>().First()))
             sTime = tp.Time;
 
         SeekSmoothly(sTime);
@@ -255,10 +256,10 @@ public partial class EditorClock : TransformableClock, IFrameBasedClock, ISource
         step = 0;
         stepTime = 1000;
 
-        if (MapInfo == null) return;
-        if (!MapInfo.TimingPoints.Any()) return;
+        if (Map == null) return;
+        if (Map.ObjectsOfType<TimingPoint>().Length == 0) return;
 
-        var point = MapInfo.GetTimingPoint(CurrentTime);
+        var point = Map.GetTimingPoint(CurrentTime);
 
         stepTime = 60000f / point.BPM / 4;
 

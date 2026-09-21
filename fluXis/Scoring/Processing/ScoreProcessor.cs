@@ -19,7 +19,7 @@ public class ScoreProcessor : JudgementDependant, IDisposable
     public APIUser Player { get; set; } = APIUser.Default;
 
     public HitWindows HitWindows { get; init; }
-    public MapInfo MapInfo { get; init; }
+    public PlayableMap Map { get; init; }
     public List<IMod> Mods { get; init; }
 
     public BindableFloat Accuracy { get; } = new(100);
@@ -39,7 +39,7 @@ public class ScoreProcessor : JudgementDependant, IDisposable
     public bool FullFlawless => Flawless == totalNotes && Miss == 0;
     public bool FullCombo => Combo.Value == totalNotes;
 
-    private float mapRating => MapInfo.RealmEntry!.Rating;
+    private float mapRating => Map.Rating;
 
     private int totalNotes => Flawless + Perfect + Great + Alright + Okay + Miss;
     private float ratedNotes => Flawless + Perfect * 0.98f + Great * 0.65f + Alright * 0.25f + Okay * 0.1f;
@@ -141,7 +141,7 @@ public class ScoreProcessor : JudgementDependant, IDisposable
         });
 
         var maxCombo = Math.Max(nowCombo, MaxCombo);
-        var score = getScore(rated / MapInfo.MaxCombo, maxCombo);
+        var score = getScore(rated / Map.MaxCombo, maxCombo);
 
         if (asyncCalculations && !instant)
             schedule.Invoke(set);
@@ -168,7 +168,7 @@ public class ScoreProcessor : JudgementDependant, IDisposable
 
         var maxScore = 1000000 * scoreMultiplier;
         var accBased = (int)(acc * (maxScore * .9f));
-        var comboBased = (int)(maxCombo / (float)MapInfo.MaxCombo * (maxScore * .1f));
+        var comboBased = (int)(maxCombo / (float)Map.MaxCombo * (maxScore * .1f));
         return accBased + comboBased;
     }
 
@@ -191,7 +191,7 @@ public class ScoreProcessor : JudgementDependant, IDisposable
             Okay = Okay,
             Miss = Miss,
             HitResults = JudgementProcessor.Results,
-            MapID = MapInfo.RealmEntry!.OnlineID,
+            MapID = Map.OnlineID,
             PlayerID = Player.ID,
             Timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
             Mods = Mods.Select(m => m.Acronym).ToList()
@@ -233,7 +233,7 @@ public class ScoreProcessor : JudgementDependant, IDisposable
         if (mods.Any(x => x is NoEventMod))
             val *= 0.4;
         if (mods.Any(x => x is NoMineMod))
-            val *= 0.6; // TODO: figure out actual value
+            val *= 0.6;
 
         return val;
     }

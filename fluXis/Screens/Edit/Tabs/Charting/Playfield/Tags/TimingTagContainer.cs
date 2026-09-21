@@ -3,6 +3,7 @@ using fluXis.Map.Structures.Events;
 using fluXis.Map.Structures.Events.Scrolling;
 using fluXis.Screens.Edit.Tabs.Charting.Playfield.Tags.EffectTags;
 using fluXis.Screens.Edit.Tabs.Charting.Playfield.Tags.TimingTags;
+using osu.Framework.Extensions.IEnumerableExtensions;
 
 namespace fluXis.Screens.Edit.Tabs.Charting.Playfield.Tags;
 
@@ -12,13 +13,13 @@ public partial class TimingTagContainer : EditorTagContainer
     {
         AddTag(new PreviewPointTag(this));
 
-        foreach (var timingPoint in Map.MapInfo.TimingPoints)
+        foreach (var timingPoint in Map.Playable.ObjectsOfType<TimingPoint>())
             addTimingPoint(timingPoint);
 
-        foreach (var sv in Map.MapInfo.ScrollVelocities)
+        foreach (var sv in Map.Playable.ObjectsOfType<ScrollVelocity>())
             addScrollVelocity(sv);
 
-        foreach (var sm in Map.MapInfo.MapEvents.ScrollMultiplyEvents)
+        foreach (var sm in Map.Playable.ObjectsOfType<ScrollMultiplierEvent>())
             addScrollMultiplier(sm);
 
         Map.RegisterAddListener<TimingPoint>(addTimingPoint);
@@ -30,7 +31,7 @@ public partial class TimingTagContainer : EditorTagContainer
 
         Map.RegisterAddListener<NoteEvent>(addNote);
         Map.RegisterRemoveListener<NoteEvent>(RemoveTag);
-        Map.MapEvents.NoteEvents.ForEach(addNote);
+        Map.Playable.ObjectsOfType<NoteEvent>().ForEach(addNote);
     }
 
     private void addTimingPoint(TimingPoint tp) => AddTag(new TimingPointTag(this, tp));

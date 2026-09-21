@@ -75,7 +75,7 @@ public abstract partial class PointListEntry : Container, IHasContextMenu
     public Action<ITimedObject> OnClone { get; set; }
     public ITimedObject Object { get; }
 
-    protected float BeatLength => Map.MapInfo.GetTimingPoint(Object.Time).MsPerBeat;
+    protected float BeatLength => Map.Playable.GetTimingPoint(Object.Time).MsPerBeat;
 
     [Resolved]
     protected EditorSettings Settings { get; private set; }

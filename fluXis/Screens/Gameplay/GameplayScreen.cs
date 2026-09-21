@@ -14,6 +14,7 @@ using fluXis.Graphics.Shaders;
 using fluXis.Input;
 using fluXis.Map;
 using fluXis.Map.Structures.Bases;
+using fluXis.Map.Structures.Events;
 using fluXis.Modes;
 using fluXis.Modes.Gameplay;
 using fluXis.Modes.Gameplay.Input;
@@ -39,7 +40,6 @@ using fluXis.Skinning.Default;
 using fluXis.Storyboards;
 using fluXis.Storyboards.Drawables;
 using fluXis.Utils.Extensions;
-using Midori.Utils;
 using osu.Framework.Allocation;
 using osu.Framework.Audio.Track;
 using osu.Framework.Bindables;
@@ -76,19 +76,19 @@ public sealed partial class GameplayScreen : FluXisScreen, IKeyBindingHandler<Fl
             if (Game is null)
                 return title;
 
-            if (Game.UsingOriginalMetadata || string.IsNullOrWhiteSpace(Map.Metadata.ArtistRomanized))
-                title += Map.Metadata.Artist;
+            if (Game.UsingOriginalMetadata || string.IsNullOrWhiteSpace(Map.ArtistRomanized))
+                title += Map.Artist;
             else
-                title += Map.Metadata.ArtistRomanized;
+                title += Map.ArtistRomanized;
 
             title += " - ";
 
-            if (Game.UsingOriginalMetadata || string.IsNullOrWhiteSpace(Map.Metadata.TitleRomanized))
-                title += Map.Metadata.Title;
+            if (Game.UsingOriginalMetadata || string.IsNullOrWhiteSpace(Map.TitleRomanized))
+                title += Map.Title;
             else
-                title += Map.Metadata.TitleRomanized;
+                title += Map.TitleRomanized;
 
-            return title + $" [{Map.Metadata.Difficulty}]";
+            return title + $" [{Map.Difficulty}]";
         }
     }
 
@@ -144,9 +144,8 @@ public sealed partial class GameplayScreen : FluXisScreen, IKeyBindingHandler<Fl
 
     public DebugText Debug { get; private set; }
 
-    public MapInfo Map { get; private set; }
+    public PlayableMap Map { get; private set; }
     public RealmMap RealmMap { get; }
-    public MapEvents MapEvents { get; private set; }
     public List<IMod> Mods { get; }
 
     private GlobalBackground background;
@@ -236,25 +235,16 @@ public sealed partial class GameplayScreen : FluXisScreen, IKeyBindingHandler<Fl
         }
 
         Map.Sort();
-        MapEvents = Map.GetMapEvents(Mods, true);
-
-        getKeyCountFromEvents();
 
         dependencies.CacheAs(Samples);
-
-        var colors = Map.Colors.JsonCopy();
-
-        if (RealmMap.Settings.DisableColors)
-            colors.PrimaryHex = colors.SecondaryHex = colors.MiddleHex = "";
-
-        dependencies.CacheAs<ICustomColorProvider>(colors);
+        dependencies.CacheAs<ICustomColorProvider>(new MapColorProvider(RealmMap.Settings.DisableColors ? [] : Map.Colors));
 
         ShaderStack = buildShaders();
         var transforms = ShaderStack.TransformHandlers.ToList();
 
         clockContainer = new GameplayClockContainer(tracks, RealmMap, Map, new Drawable[]
         {
-            new FlashOverlay(MapEvents.FlashEvents.Where(e => e.InBackground).ToList()),
+            new FlashOverlay(Map.ObjectsOfType<FlashEvent>().Where(e => e.InBackground).ToList()),
             RulesetContainer = createRuleset().With(x =>
             {
                 x.ScrollSpeed = new Bindable<float>(Config.Get<float>(FluXisSetting.ScrollSpeed));
@@ -274,14 +264,14 @@ public sealed partial class GameplayScreen : FluXisScreen, IKeyBindingHandler<Fl
         dependencies.CacheAs<IBeatSyncProvider>(GameplayClock);
         LoadComponent(GameplayClock);
 
-        var storyboard = Map.CreateDrawableStoryboard() ?? new DrawableStoryboard(Map, new Storyboard(), ".");
+        var storyboard = Map.Storyboard?.CreateDrawable(Map, Map.Storage) ?? new DrawableStoryboard(Map, new Storyboard(), ".");
 
         LoadComponent(GameplayClock);
-        LoadComponent(dependencies.CacheAsAndReturn(Hitsounding = new Hitsounding(RealmMap.MapSet, Map.HitSoundFades, GameplayClock.RateBindable) { Clock = GameplayClock }));
+        LoadComponent(dependencies.CacheAsAndReturn(Hitsounding = new Hitsounding(RealmMap.MapSet, Map.ObjectsOfType<HitSoundFade>(), GameplayClock.RateBindable) { Clock = GameplayClock }));
         LoadComponent(RulesetContainer);
         LoadComponent(storyboard);
 
-        var camera = new CameraContainer(MapEvents.Where(x => x is ICameraEvent).Cast<ICameraEvent>().ToList());
+        var camera = new CameraContainer(Map.ObjectsOfType<ICameraEvent>());
 
         var pulseContent = camera.WithChildren(new Drawable[]
         {
@@ -339,7 +329,7 @@ public sealed partial class GameplayScreen : FluXisScreen, IKeyBindingHandler<Fl
         Container pulseContainer;
 
         AddRangeInternal([
-            new LetterBoxedContainer(Map.Force16By9)
+            new LetterBoxedContainer(Map.ForceAspect)
             {
                 Anchor = Anchor.Centre,
                 Origin = Anchor.Centre,
@@ -361,14 +351,14 @@ public sealed partial class GameplayScreen : FluXisScreen, IKeyBindingHandler<Fl
                             Origin = Anchor.Centre,
                             Children =
                             [
-                                ShaderStack.AddContent(new AspectRatioContainer(Map.Force16By9)
+                                ShaderStack.AddContent(new AspectRatioContainer(Map.ForceAspect)
                                 {
                                     Masking = true,
                                     Children = new Drawable[]
                                     {
                                         pulseContent,
-                                        new PulseEffect(MapEvents.PulseEvents) { Clock = GameplayClock },
-                                        new FlashOverlay(MapEvents.FlashEvents.Where(e => !e.InBackground).ToList()) { Clock = GameplayClock },
+                                        new PulseEffect(Map.ObjectsOfType<PulseEvent>()) { Clock = GameplayClock },
+                                        new FlashOverlay(Map.ObjectsOfType<FlashEvent>().Where(e => !e.InBackground).ToList()) { Clock = GameplayClock },
                                     }
                                 }),
                                 new DangerHealthOverlay(),
@@ -385,7 +375,7 @@ public sealed partial class GameplayScreen : FluXisScreen, IKeyBindingHandler<Fl
             Debug = new DebugText()
         ]);
 
-        clockContainer.Add(new BeatPulseManager(Map, MapEvents.BeatPulseEvents, pulseContainer));
+        clockContainer.Add(new BeatPulseManager(Map, Map.ObjectsOfType<BeatPulseEvent>(), pulseContainer));
 
         backgroundVideo.LoadVideo(Map);
 
@@ -401,7 +391,7 @@ public sealed partial class GameplayScreen : FluXisScreen, IKeyBindingHandler<Fl
     private ShaderStackContainer buildShaders()
     {
         var stack = new ShaderStackContainer();
-        var shaders = MapEvents.ShaderEvents;
+        var shaders = Map.ObjectsOfType<ShaderEvent>();
         var shaderTypes = shaders.Select(e => e.Type).Distinct().ToList();
 
         foreach (var shaderType in shaderTypes)
@@ -489,15 +479,15 @@ public sealed partial class GameplayScreen : FluXisScreen, IKeyBindingHandler<Fl
             if (ruleset != null) break;
         }
 
-        ruleset ??= new RulesetContainer(modes.Find(Map.GameMode) ?? throw GameModeManager.FailedToLoadException(), Map, MapEvents, Mods) { CurrentPlayer = api.User.Value ?? APIUser.Default };
+        ruleset ??= new RulesetContainer(modes.Find(Map.Mode) ?? throw GameModeManager.FailedToLoadException(), Map, Mods) { CurrentPlayer = api.User.Value ?? APIUser.Default };
         rsc.ForEach(x => x.Modify(ruleset));
         return ruleset;
     }
 
-    private MapInfo loadMap()
+    private PlayableMap loadMap()
     {
         var mc = capabilities.OfType<IMapCapability>().ToArray();
-        MapInfo map = null;
+        PlayableMap map = null;
 
         foreach (var capability in mc)
         {
@@ -505,7 +495,7 @@ public sealed partial class GameplayScreen : FluXisScreen, IKeyBindingHandler<Fl
             if (map != null) break;
         }
 
-        map ??= RealmMap.GetMapInfo(Mods);
+        map ??= RealmMap.GetPlayable(Game.GameModes, Mods);
         mc.ForEach(x => x.Modify(map));
         return map;
     }
@@ -748,17 +738,5 @@ public sealed partial class GameplayScreen : FluXisScreen, IKeyBindingHandler<Fl
     {
         if (e.Action is FluXisGlobalKeybind.QuickRestart or FluXisGlobalKeybind.QuickExit)
             quickActionOverlay.IsHolding = false;
-    }
-
-    private void getKeyCountFromEvents()
-    {
-        foreach (var switchEvent in MapEvents.LaneSwitchEvents)
-        {
-            if (Map.InitialKeyCount == 0)
-                Map.InitialKeyCount = switchEvent.Count;
-        }
-
-        if (Map.InitialKeyCount == 0)
-            Map.InitialKeyCount = RealmMap.KeyCount;
     }
 }

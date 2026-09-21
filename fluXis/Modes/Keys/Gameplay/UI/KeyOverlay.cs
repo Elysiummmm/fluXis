@@ -28,6 +28,9 @@ public partial class KeyOverlay : Container
     [Resolved]
     private ReadableKeyCombinationProvider keyCombinationProvider { get; set; }
 
+    [Resolved]
+    private KeysKeybindContainer keybinds { get; set; }
+
     private FillFlowContainer flow;
     private int keyCount;
     private bool first = true;
@@ -39,13 +42,13 @@ public partial class KeyOverlay : Container
         Anchor = Anchor.BottomCentre;
         Origin = Anchor.BottomCentre;
 
-        var binds = ruleset.Input.Keys;
+        var binds = keybinds.Keys;
 
-        if (ruleset.Input.Dual)
+        if (ruleset.Map.IsDual)
         {
-            var half = ruleset.Input.Keys.Count / 2;
+            var half = binds.Length / 2;
             var start = half * playfield.PlayerIndex;
-            binds = binds.GetRange(start, half);
+            binds = binds[start..half];
         }
 
         InternalChild = flow = new FillFlowContainer

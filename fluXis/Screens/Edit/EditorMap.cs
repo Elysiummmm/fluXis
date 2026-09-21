@@ -15,50 +15,49 @@ using fluXis.Map.Structures.Events.Camera;
 using fluXis.Map.Structures.Events.Groups;
 using fluXis.Map.Structures.Events.Playfields;
 using fluXis.Map.Structures.Events.Scrolling;
+using fluXis.Modes;
 using fluXis.Screens.Edit.Tabs.Verify;
 using fluXis.Storyboards;
 using fluXis.Utils;
 using fluXis.Utils.Extensions;
 using JetBrains.Annotations;
 using Midori.Utils;
-using Newtonsoft.Json;
 using osu.Framework.Graphics;
 using osu.Framework.Threading;
-using SixLabors.ImageSharp;
 
 namespace fluXis.Screens.Edit;
 
 public class EditorMap : IVerifyContext
 {
-    public EditorMapInfo MapInfo { get; set; }
+    public PlayableMap Playable { get; set; }
     public RealmMap RealmMap { get; set; }
 
     public FileWatcher ScriptWatcher { get; private set; }
 
-    public MapEvents MapEvents => MapInfo.MapEvents;
-    public Storyboard Storyboard => MapInfo.Storyboard;
+    public Storyboard Storyboard => Playable.Storyboard;
     public RealmMapSet MapSet => RealmMap?.MapSet;
 
     private readonly Action<Drawable> loadComponent;
     private readonly Scheduler scheduler;
+    private readonly Editor editor;
 
-    public string MapInfoHash => MapUtils.GetHash(MapInfo.Serialize());
-    public string MapEventsHash => MapUtils.GetHash(MapEvents.Save());
+    public string MapInfoHash => MapUtils.GetHash(Playable.Serialize());
     public string StoryboardHash => MapUtils.GetHash(Storyboard.Serialize());
 
-    public bool IsNew => RealmMap == null || MapInfo == null;
+    public bool IsNew => RealmMap == null || Playable == null;
 
     public PanelContainer Panels { get; set; }
 
-    private List<IChangeNotifier> notifiers = new();
+    private List<IChangeNotifier> notifiers = [];
 
-    public EditorMap(EditorMapInfo info, RealmMap map, Action<Drawable> loadComponent, Scheduler scheduler)
+    public EditorMap(PlayableMap playable, RealmMap realm, Action<Drawable> loadComponent, Scheduler scheduler, Editor editor)
     {
-        MapInfo = info;
-        RealmMap = map;
+        Playable = playable;
+        RealmMap = realm;
 
         this.loadComponent = loadComponent;
         this.scheduler = scheduler;
+        this.editor = editor;
     }
 
     public void SetupWatcher()
@@ -94,30 +93,31 @@ public class EditorMap : IVerifyContext
     {
         notifiers = new List<IChangeNotifier>
         {
-            new ChangeNotifier<HitObject>(MapInfo.HitObjects),
-            new ChangeNotifier<TimingPoint>(MapInfo.TimingPoints),
-            new ChangeNotifier<ScrollVelocity>(MapInfo.ScrollVelocities),
-            new ChangeNotifier<LaneSwitchEvent>(MapEvents.LaneSwitchEvents),
-            new ChangeNotifier<FlashEvent>(MapEvents.FlashEvents),
-            new ChangeNotifier<ColorFadeEvent>(MapEvents.ColorFadeEvents),
-            new ChangeNotifier<PulseEvent>(MapEvents.PulseEvents),
-            new ChangeNotifier<PlayfieldMoveEvent>(MapEvents.PlayfieldMoveEvents),
-            new ChangeNotifier<PlayfieldScaleEvent>(MapEvents.PlayfieldScaleEvents),
-            new ChangeNotifier<PlayfieldRotateEvent>(MapEvents.PlayfieldRotateEvents),
-            new ChangeNotifier<LayerFadeEvent>(MapEvents.LayerFadeEvents),
-            new ChangeNotifier<HitObjectEaseEvent>(MapEvents.HitObjectEaseEvents),
-            new ChangeNotifier<ShakeEvent>(MapEvents.ShakeEvents),
-            new ChangeNotifier<ShaderEvent>(MapEvents.ShaderEvents),
-            new ChangeNotifier<BeatPulseEvent>(MapEvents.BeatPulseEvents),
-            new ChangeNotifier<ScrollMultiplierEvent>(MapEvents.ScrollMultiplyEvents),
-            new ChangeNotifier<TimeOffsetEvent>(MapEvents.TimeOffsetEvents),
-            new ChangeNotifier<CameraMoveEvent>(MapEvents.CameraMoveEvents),
-            new ChangeNotifier<CameraScaleEvent>(MapEvents.CameraScaleEvents),
-            new ChangeNotifier<CameraRotateEvent>(MapEvents.CameraRotateEvents),
-            new ChangeNotifier<LoopEvent>(MapEvents.LoopEvents),
-            new ChangeNotifier<NoteEvent>(MapEvents.NoteEvents),
+            new ChangeNotifier<HitObject>(Playable.ObjectsOfType<HitObject>()),
+            new ChangeNotifier<TimingPoint>(Playable.ObjectsOfType<TimingPoint>()),
+            new ChangeNotifier<HitSoundFade>(Playable.ObjectsOfType<HitSoundFade>()),
+            new ChangeNotifier<ScrollVelocity>(Playable.ObjectsOfType<ScrollVelocity>()),
+            new ChangeNotifier<LaneSwitchEvent>(Playable.ObjectsOfType<LaneSwitchEvent>()),
+            new ChangeNotifier<FlashEvent>(Playable.ObjectsOfType<FlashEvent>()),
+            new ChangeNotifier<ColorFadeEvent>(Playable.ObjectsOfType<ColorFadeEvent>()),
+            new ChangeNotifier<PulseEvent>(Playable.ObjectsOfType<PulseEvent>()),
+            new ChangeNotifier<PlayfieldMoveEvent>(Playable.ObjectsOfType<PlayfieldMoveEvent>()),
+            new ChangeNotifier<PlayfieldScaleEvent>(Playable.ObjectsOfType<PlayfieldScaleEvent>()),
+            new ChangeNotifier<PlayfieldRotateEvent>(Playable.ObjectsOfType<PlayfieldRotateEvent>()),
+            new ChangeNotifier<LayerFadeEvent>(Playable.ObjectsOfType<LayerFadeEvent>()),
+            new ChangeNotifier<HitObjectEaseEvent>(Playable.ObjectsOfType<HitObjectEaseEvent>()),
+            new ChangeNotifier<ShakeEvent>(Playable.ObjectsOfType<ShakeEvent>()),
+            new ChangeNotifier<ShaderEvent>(Playable.ObjectsOfType<ShaderEvent>()),
+            new ChangeNotifier<BeatPulseEvent>(Playable.ObjectsOfType<BeatPulseEvent>()),
+            new ChangeNotifier<ScrollMultiplierEvent>(Playable.ObjectsOfType<ScrollMultiplierEvent>()),
+            new ChangeNotifier<TimeOffsetEvent>(Playable.ObjectsOfType<TimeOffsetEvent>()),
+            new ChangeNotifier<CameraMoveEvent>(Playable.ObjectsOfType<CameraMoveEvent>()),
+            new ChangeNotifier<CameraScaleEvent>(Playable.ObjectsOfType<CameraScaleEvent>()),
+            new ChangeNotifier<CameraRotateEvent>(Playable.ObjectsOfType<CameraRotateEvent>()),
+            new ChangeNotifier<LoopEvent>(Playable.ObjectsOfType<LoopEvent>()),
+            new ChangeNotifier<NoteEvent>(Playable.ObjectsOfType<NoteEvent>()),
             new ChangeNotifier<StoryboardAnimation>(new List<StoryboardAnimation>()),
-            MapInfo.Storyboard
+            Playable.Storyboard
         };
 
         foreach (var notifier in notifiers)
@@ -141,8 +141,8 @@ public class EditorMap : IVerifyContext
 
     public bool CanChangeTo(int mode)
     {
-        var highestLane = MapInfo.HitObjects.MaxBy(o => o.Lane)?.Lane ?? 0;
-        highestLane = Math.Max(highestLane, MapEvents.LaneSwitchEvents.MaxBy(o => o.Count)?.Count ?? 0);
+        var highestLane = Playable.ObjectsOfType<HitObject>().MaxBy(o => o.Lane)?.Lane ?? 0;
+        highestLane = Math.Max(highestLane, Playable.ObjectsOfType<LaneSwitchEvent>().MaxBy(o => o.Count)?.Count ?? 0);
         return highestLane <= mode;
     }
 
@@ -153,8 +153,7 @@ public class EditorMap : IVerifyContext
         if (file == null || !copyFile(file))
             return;
 
-        MapInfo.AudioFile = file.Name;
-        RealmMap.Metadata.Audio = file.Name;
+        Playable.AudioFile = file.Name;
         RealmMap.AudioHash = MapUtils.GetXXHash(file.OpenRead());
         AudioChanged?.Invoke();
     }
@@ -164,18 +163,13 @@ public class EditorMap : IVerifyContext
         if (file == null || !copyFile(file))
             return;
 
-        MapInfo.BackgroundFile = file.Name;
-        RealmMap.Metadata.Background = file.Name;
+        Playable.BackgroundFile = file.Name;
         BackgroundChanged?.Invoke();
 
         // update accent color
         using var stream = RealmMap.GetBackgroundStream();
         var color = ImageUtils.GetAverageColour(stream);
-
-        if (color != Colour4.Transparent)
-            RealmMap.Metadata.Color = MapInfo.Colors.Accent = color;
-        else
-            RealmMap.Metadata.ColorHex = MapInfo.Colors.AccentHex = string.Empty;
+        Playable.Colors["$accent"] = color != Colour4.Transparent ? color : Colour4.Transparent;
     }
 
     public void SetCover(FileInfo file)
@@ -183,8 +177,7 @@ public class EditorMap : IVerifyContext
         if (file == null || !copyFile(file))
             return;
 
-        RealmMap.MapSet.Cover = file.Name;
-        MapInfo.CoverFile = file.Name;
+        Playable.CoverFile = file.Name;
         CoverChanged?.Invoke();
     }
 
@@ -193,7 +186,7 @@ public class EditorMap : IVerifyContext
         if (file == null || !copyFile(file))
             return;
 
-        MapInfo.VideoFile = file.Name;
+        Playable.VideoFile = file.Name;
     }
 
     private bool copyFile(FileInfo file)
@@ -351,53 +344,17 @@ public class EditorMap : IVerifyContext
 
     public void ApplyOffsetToAll(double offset) => notifiers.ForEach(n => n.ApplyOffset(offset));
 
-    public void Sort()
-    {
-        MapInfo.Sort();
-        MapEvents.Sort();
-    }
+    public void Sort() => Playable.Sort();
 
     #endregion
 
     #region IVerifyContext Implementation
 
-    MapInfo IVerifyContext.MapInfo => MapInfo;
-    MapEvents IVerifyContext.MapEvents => MapEvents;
+    GameModeManager IVerifyContext.Modes => editor.GameModes;
+    PlayableMap IVerifyContext.Map => Playable;
     RealmMap IVerifyContext.RealmMap => RealmMap;
 
     #endregion
-
-    public class EditorMapInfo : MapInfo, IDeepCloneable<EditorMapInfo>
-    {
-        [JsonIgnore]
-        public MapEvents MapEvents { get; set; }
-
-        [JsonIgnore]
-        public Storyboard Storyboard { get; set; }
-
-        public EditorMapInfo(MapMetadata metadata)
-            : base(metadata)
-        {
-        }
-
-        public EditorMapInfo() { }
-
-        public override T GetMapEvents<T>() => MapEvents as T;
-
-        public override Storyboard GetStoryboard() => new()
-        {
-            Resolution = Storyboard.Resolution,
-            Elements = Storyboard.Elements.ToList()
-        };
-
-        public EditorMapInfo DeepClone()
-        {
-            var clone = this.JsonCopy();
-            clone.MapEvents = MapEvents.JsonCopy();
-            clone.Storyboard = Storyboard.JsonCopy();
-            return clone;
-        }
-    }
 
     public interface IChangeNotifier
     {
@@ -442,9 +399,9 @@ public class EditorMap : IVerifyContext
         public event Action<T> OnTypedRemove;
         public event Action<T> OnTypedUpdate;
 
-        public ChangeNotifier(List<T> list, Action<T> add = null, Action<T> remove = null, Action<T> update = null)
+        public ChangeNotifier(IEnumerable<T> list, Action<T> add = null, Action<T> remove = null, Action<T> update = null)
         {
-            Objects = list;
+            Objects = [.. list];
             this.add = add;
             this.remove = remove;
             this.update = update;

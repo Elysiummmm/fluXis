@@ -288,7 +288,7 @@ public abstract partial class PointsList : Container
 
     protected abstract void RegisterEvents();
 
-    protected void RegisterTypeEvents<T>(List<T> items)
+    protected void RegisterTypeEvents<T>(IEnumerable<T> items)
         where T : class, ITimedObject
     {
         Map.RegisterAddListener<T>(AddPoint);

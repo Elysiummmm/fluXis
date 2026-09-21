@@ -2,6 +2,7 @@ using System;
 using fluXis.Configuration;
 using fluXis.Map.Structures;
 using fluXis.Modes.Keys.Gameplay.UI;
+using fluXis.Modes.Keys.Map.Objects;
 using fluXis.Screens.Edit.Tabs.Charting.Effect;
 using fluXis.Screens.Edit.Tabs.Charting.Modding;
 using fluXis.Screens.Edit.Tabs.Charting.Playfield.Tags;
@@ -100,7 +101,7 @@ public partial class EditorPlayfield : Container, ITimePositionProvider
             new EditorPlayfieldModding(modHighlight, modComments)
         };
 
-        var playfields = (map.MapInfo.IsSplit ? 2 : 1);
+        var playfields = (map.Playable.IsDualSplit ? 2 : 1);
 
         for (int i = 0; i < playfields; i++)
         {
@@ -158,14 +159,12 @@ public partial class EditorPlayfield : Container, ITimePositionProvider
         if (!clock.IsRunning && !force)
             return;
 
-        var sound = info.HitSound;
+        var sound = info.Sample;
 
-        if (sound == ":normal" && info.Type == HitObjectType.Tick)
+        if (sound == ":normal" && info is Tick t)
         {
             sound = ":tick-big";
-
-            if (info.HoldTime > 0)
-                sound = ":tick-small";
+            if (t.Small) sound = ":tick-small";
         }
 
         var channel = hitsounding.GetSample(sound);

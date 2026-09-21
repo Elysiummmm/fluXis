@@ -1,9 +1,6 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using fluXis.Map;
 using fluXis.Map.Structures.Events;
-using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osuTK;
@@ -14,8 +11,7 @@ public partial class BeatPulseManager : CompositeDrawable
 {
     public override bool RemoveCompletedTransforms => false;
 
-    private MapInfo map { get; }
-    private List<BeatPulseEvent> events { get; }
+    private PlayableMap map { get; }
     private Drawable target { get; }
 
     private float targetScale
@@ -24,34 +20,29 @@ public partial class BeatPulseManager : CompositeDrawable
         set => target.Scale = new Vector2(value);
     }
 
-    public BeatPulseManager(MapInfo map, List<BeatPulseEvent> events, Drawable target)
+    public BeatPulseManager(PlayableMap map, BeatPulseEvent[] events, Drawable target)
     {
         this.map = map;
-        this.events = events.ToList();
         this.target = target;
+        generate(events);
     }
 
-    [BackgroundDependencyLoader]
-    private void load() => generate();
-
-    public void Rebuild(List<BeatPulseEvent> ev)
+    public void Rebuild(BeatPulseEvent[] ev)
     {
         ClearTransforms();
-        events.Clear();
-        events.AddRange(ev);
-        generate();
+        generate(ev);
     }
 
-    private void generate()
+    private void generate(BeatPulseEvent[] events)
     {
-        for (int i = 0; i < events.Count; i++)
+        for (int i = 0; i < events.Length; i++)
         {
             var ev = events[i];
 
             if (Math.Abs(ev.Strength - 1) < 0.0001f || ev.Interval < 0.01f)
                 continue;
 
-            var end = i + 1 < events.Count ? events[i + 1].Time : map.EndTime;
+            var end = i + 1 < events.Length ? events[i + 1].Time : map.EndTime;
 
             var t = ev.Time;
 

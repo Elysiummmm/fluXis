@@ -1,3 +1,4 @@
+/*
 using fluXis.Input;
 using fluXis.Map.Structures;
 using fluXis.Scoring;
@@ -113,3 +114,4 @@ public partial class DrawableLandmine : DrawableHitObject
         return null;
     }
 }
+*/

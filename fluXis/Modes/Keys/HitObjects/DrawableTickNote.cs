@@ -1,3 +1,4 @@
+/*
 using System;
 using fluXis.Input;
 using fluXis.Map.Structures;
@@ -168,3 +169,4 @@ public partial class DrawableTickNote : DrawableHitObject
         holdStartTime = null;
     }
 }
+*/

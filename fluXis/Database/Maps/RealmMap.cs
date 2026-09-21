@@ -3,13 +3,16 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using fluXis.Map;
+using fluXis.Map.Format;
+using fluXis.Map.Format.Legacy;
+using fluXis.Map.Structures;
+using fluXis.Modes;
 using fluXis.Mods;
-using fluXis.Utils;
 using JetBrains.Annotations;
-using Midori.Utils;
 using osu.Framework.Audio.Track;
+using osu.Framework.Extensions.IEnumerableExtensions;
 using osu.Framework.Graphics.Textures;
-using osu.Framework.Logging;
+using osu.Framework.Platform;
 using Realms;
 
 namespace fluXis.Database.Maps;
@@ -101,16 +104,15 @@ public class RealmMap : RealmObject
         Status = MapStatus.Local;
     }
 
-    [CanBeNull]
-    public MapInfo GetMapInfo(List<IMod> mods)
-    {
-        var map = GetMapInfo();
+#nullable enable
 
-        if (map == null)
-            return null;
+    public PlayableMap? GetPlayable(GameModeManager modes, List<IMod> mods)
+    {
+        var map = GetPlayable(modes);
+        if (map == null) return null;
 
         foreach (var mod in mods.OfType<IApplicableToHitObject>())
-            map.HitObjects.ForEach(mod.Apply);
+            map.ObjectsOfType<HitObject>().ForEach(mod.Apply);
 
         foreach (var mod in mods.OfType<IApplicableToMap>())
             mod.Apply(map);
@@ -118,51 +120,57 @@ public class RealmMap : RealmObject
         return map;
     }
 
-    [CanBeNull]
-    public virtual MapInfo GetMapInfo() => GetMapInfo<MapInfo>();
-
-    [CanBeNull]
-    public virtual T GetMapInfo<T>()
-        where T : MapInfo, new()
+    public virtual PlayableMap? GetPlayable(GameModeManager modes)
     {
+        var storage = new NativeStorage(MapFiles.GetFullPath(MapSet.ID.ToString()));
+        var ext = Path.GetExtension(FileName);
+
+        IMapFormat format = ext switch
+        {
+            ".fsc" => new LegacyMapFormat(storage),
+            ".rhym" => new RhymMapFormat(storage, modes),
+            _ => throw new InvalidOperationException("Unknown file format.")
+        };
+
+        var playable = format.Parse(FileName);
+        if (playable is null) return null;
+
+        playable.OnlineID = OnlineID;
+        playable.Rating = Rating;
+        playable.Settings = Settings;
+        return playable;
+
+        /*
+        var path = MapFiles.GetFullPath(MapSet.GetPathForFile(FileName));
+        if (!File.Exists(path)) return null;
+
+        var json = File.ReadAllText(path);
+        var hash = MapUtils.GetHash(json);
+        var map = json.Deserialize<LegacyMapJson>();
+        byte[] audioBytes = [];
+        string fullAudioPath = MapFiles.GetFullPath(MapSet.GetPathForFile(map.AudioFile));
+
         try
         {
-            var path = MapFiles.GetFullPath(MapSet.GetPathForFile(FileName));
-
-            if (!File.Exists(path))
-                return null;
-
-            var json = File.ReadAllText(path);
-            var hash = MapUtils.GetHash(json);
-            var map = json.Deserialize<T>();
-            byte[] audioBytes = [];
-            string fullAudioPath = MapFiles.GetFullPath(MapSet.GetPathForFile(map.AudioFile));
-
-            try
+            if (File.Exists(fullAudioPath))
             {
-                if (File.Exists(fullAudioPath))
-                {
-                    audioBytes = File.ReadAllBytes(fullAudioPath);
-                }
+                audioBytes = File.ReadAllBytes(fullAudioPath);
             }
-            catch (Exception e)
-            {
-                Logger.Error(e, $"Failed to get audioHash for map info");
-                audioBytes = [];
-            }
-
-            var audioHash = MapUtils.GetXXHash(audioBytes);
-            map.RealmEntry = this;
-            map.Hash = hash;
-            map.AudioHash = audioHash;
-            return map;
         }
         catch (Exception e)
         {
-            Logger.Error(e, "Failed to load map from path: " + MapSet.GetPathForFile(FileName));
-            return null;
+            Logger.Error(e, $"Failed to get audioHash for map info");
+            audioBytes = [];
         }
+
+        var audioHash = MapUtils.GetXXHash(audioBytes);
+        map.RealmEntry = this;
+        map.Hash = hash;
+        map.AudioHash = audioHash;
+        return map;*/
     }
+
+#nullable disable
 
     public virtual Texture GetBackground()
     {

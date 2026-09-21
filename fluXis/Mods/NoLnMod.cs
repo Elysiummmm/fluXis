@@ -1,6 +1,7 @@
 using System;
 using fluXis.Graphics.Sprites.Icons;
 using fluXis.Map.Structures;
+using fluXis.Modes.Keys.Map.Objects;
 using osu.Framework.Graphics.Sprites;
 
 namespace fluXis.Mods;
@@ -16,5 +17,8 @@ public class NoLnMod : IMod, IApplicableToHitObject
     public bool Rankable => true;
     public Type[] IncompatibleMods => Array.Empty<Type>();
 
-    public void Apply(HitObject hit) => hit.HoldTime = 0;
+    public void Apply(HitObject hit)
+    {
+        if (hit is LongNote ln) ln.Duration = 0;
+    }
 }

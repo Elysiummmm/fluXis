@@ -6,11 +6,13 @@ using fluXis.Screens.Edit.Tabs.Charting.Playfield;
 using Newtonsoft.Json;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using rhym;
 
 namespace fluXis.Map.Structures.Events.Scrolling;
 
 [Description("Changes how hit objects approach the receptors.")]
-public class HitObjectEaseEvent : IMapEvent, IHasEasing
+[ResourceLocation("flux:events/scroll/ease")]
+public class HitObjectEaseEvent : IMapEvent, IHasEasing, IScrollEvent
 {
     [JsonProperty("time")]
     public double Time { get; set; }

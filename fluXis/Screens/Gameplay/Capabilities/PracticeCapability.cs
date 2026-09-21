@@ -1,5 +1,6 @@
 using System.Linq;
 using fluXis.Map;
+using fluXis.Map.Structures;
 using fluXis.Screens.Gameplay.Capabilities.Bases;
 
 namespace fluXis.Screens.Gameplay.Capabilities;
@@ -24,8 +25,10 @@ public class PracticeCapability : IMapCapability
         Screen.GameplayStartTime = start;
     }
 
-    void IMapCapability.Modify(MapInfo map)
+    void IMapCapability.Modify(PlayableMap map)
     {
-        map.HitObjects = map.HitObjects.Where(o => o.Time >= start && o.Time <= end).ToList();
+        var objs = map.ObjectsOfType<HitObject>();
+        map.RemoveObjects(objs);
+        map.AddObjects(objs.Where(o => o.Time >= start && o.Time <= end));
     }
 }

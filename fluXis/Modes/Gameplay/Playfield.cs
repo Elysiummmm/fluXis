@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
-using fluXis.Database.Maps;
 using fluXis.Map;
 using fluXis.Map.Structures.Attributes;
 using fluXis.Map.Structures.Bases;
 using fluXis.Map.Structures.Events;
+using fluXis.Map.Structures.Events.Playfields;
 using fluXis.Screens.Gameplay.Audio.Hitsounds;
 using fluXis.Screens.Gameplay.Ruleset;
 using fluXis.Skinning;
@@ -49,9 +49,8 @@ public abstract partial class Playfield : CompositeDrawable
         }
     }
 
-    public MapInfo MapInfo => Ruleset.MapInfo;
-    public MapEvents MapEvents => Ruleset.MapEvents;
-    public RealmMap RealmMap => MapInfo.RealmEntry!;
+    public PlayableMap Map => Ruleset.Map;
+    // public RealmMap RealmMap => MapInfo.RealmEntry!;
 
     public ColorManager ColorManager { get; private set; }
     public float HUDAlpha { get; set; } = 1f;
@@ -80,19 +79,19 @@ public abstract partial class Playfield : CompositeDrawable
 
         AddRangeInternal([shakeProxy = new ShakeProxy(), ColorManager]);
 
-        RegisterReloadableEvent(MapEvents.ColorFadeEvents);
-        RegisterReloadableEvent(MapEvents.LayerFadeEvents);
-        RegisterReloadableEvent(MapEvents.PlayfieldMoveEvents);
-        RegisterReloadableEvent(MapEvents.PlayfieldScaleEvents);
-        RegisterReloadableEvent(MapEvents.PlayfieldRotateEvents);
+        RegisterReloadableEvent(Map.ObjectsOfType<ColorFadeEvent>());
+        RegisterReloadableEvent(Map.ObjectsOfType<LayerFadeEvent>());
+        RegisterReloadableEvent(Map.ObjectsOfType<PlayfieldMoveEvent>());
+        RegisterReloadableEvent(Map.ObjectsOfType<PlayfieldScaleEvent>());
+        RegisterReloadableEvent(Map.ObjectsOfType<PlayfieldRotateEvent>());
 
         if (PlayerIndex == 0 && !IsSubPlayfield)
-            registerReloadableShake(MapEvents.ShakeEvents);
+            registerReloadableShake(Map.ObjectsOfType<ShakeEvent>());
     }
 
     #region Event Registration
 
-    protected void RegisterReloadableEvent<T>(List<T> initial) where T : IApplicableToPlayfield
+    protected void RegisterReloadableEvent<T>(IEnumerable<T> initial) where T : IApplicableToPlayfield
     {
         var props = typeof(T).GetAnimatedProperties();
         initial.ForEach(x => x.Apply(this));
@@ -104,7 +103,7 @@ public abstract partial class Playfield : CompositeDrawable
         });
     }
 
-    private void registerReloadableShake(List<ShakeEvent> shakes)
+    private void registerReloadableShake(IEnumerable<ShakeEvent> shakes)
     {
         applyShakes(shakes);
 
@@ -114,7 +113,7 @@ public abstract partial class Playfield : CompositeDrawable
             applyShakes(objs);
         });
 
-        void applyShakes(List<ShakeEvent> list)
+        void applyShakes(IEnumerable<ShakeEvent> list)
         {
             shakeProxy.Position = Vector2.Zero;
 

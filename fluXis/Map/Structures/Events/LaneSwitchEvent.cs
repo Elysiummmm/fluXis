@@ -7,12 +7,14 @@ using fluXis.Screens.Edit.Tabs.Charting.Blueprints.Placement;
 using fluXis.Utils.Attributes;
 using Newtonsoft.Json;
 using osu.Framework.Graphics;
+using rhym;
 
 namespace fluXis.Map.Structures.Events;
 
 [DoNotShowInEditorPlayfield]
 [Description("Changes the amount of visble lanes.")]
 [Icon(FluXisIconType.LaneSwitch)]
+[ResourceLocation("flux:events/laneswitch")]
 public class LaneSwitchEvent : IMapEvent, IHasDuration, IHasEasing
 {
     [JsonProperty("time")]

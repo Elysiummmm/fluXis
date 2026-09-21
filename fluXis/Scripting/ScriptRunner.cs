@@ -17,7 +17,7 @@ public class ScriptRunner
     public static Logger Logger { get; } = Logger.GetLogger("scripting");
 
     [CanBeNull]
-    protected MapInfo Map { get; set; }
+    protected PlayableMap Map { get; set; }
 
     public Action<string, string, string, object> DefineParameter;
     protected Lua Lua { get; }

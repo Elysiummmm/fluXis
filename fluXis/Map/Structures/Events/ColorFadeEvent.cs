@@ -10,10 +10,12 @@ using Newtonsoft.Json;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Shapes;
 using osuTK.Graphics;
+using rhym;
 
 namespace fluXis.Map.Structures.Events;
 
 [Description("Changes the colors of hit objects and other skin elements.")]
+[ResourceLocation("flux:events/colorfade")]
 public class ColorFadeEvent : IMapEvent, IHasDuration, IHasEasing, IApplicableToPlayfield
 {
     [JsonProperty("time")]

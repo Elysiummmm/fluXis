@@ -11,11 +11,13 @@ using osu.Framework.Graphics.Colour;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osuTK.Graphics;
+using rhym;
 
 namespace fluXis.Map.Structures.Events;
 
 [Description("Overlays a solid color over the screen.")]
 [Icon(FluXisIconType.Flash)]
+[ResourceLocation("flux:events/flash")]
 public class FlashEvent : IMapEvent, IHasDuration, IHasEasing
 {
     [JsonProperty("time")]
