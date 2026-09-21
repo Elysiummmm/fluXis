@@ -153,6 +153,7 @@ public enum ShaderType
     Bloom,
     Greyscale,
     Invert,
+    Contrast,
 
     [ShaderStrength(1, Max = 20f, Step = 1f)]
     Chromatic,
