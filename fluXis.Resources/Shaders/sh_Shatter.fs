@@ -3,7 +3,6 @@ layout(std140, set = 0, binding = 0) uniform m_ShatterParameters
     vec2 TexSize;
     float CellSize;
     float DistortionStrength;
-    float PhaseSpeed;
     float Time;
 };
 
@@ -55,7 +54,7 @@ highp vec2 voronoi(vec2 pos) {
             vec2 neighbour = vec2(float(x), float(y));
             vec2 point = random2(ipos + neighbour);
 
-            point = 0.5 + 0.5 * sin(Time * PhaseSpeed + 6.2834 * point);
+            point = 0.5 + 0.5 * sin(Time + 6.2834 * point);
 
             vec2 diff = neighbour + point - fpos;
             float dist = length(diff);
