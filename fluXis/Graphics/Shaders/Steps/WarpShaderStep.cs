@@ -12,23 +12,28 @@ public class WarpShaderStep : ShaderStep<WarpShaderStep.WarpParameters>
 
     public override bool ShouldRender => Strength3 > 0;
 
-    public override void UpdateParameters(IFrameBuffer current) => ParameterBuffer.Data = ParameterBuffer.Data with
+    private float shaderTime { get; set; }
+
+    public override void UpdateParameters(IFrameBuffer current)
     {
-        TexSize = current.Size,
-        PhaseSpeed = Strength,
-        Scale = Strength2 + 4f,
-        Iterations = Strength3,
-        Time = (float)Time.Current / 1000f
-    };
+        shaderTime += (float)Time.Elapsed / 1000f * Strength * 3f;
+
+        ParameterBuffer.Data = ParameterBuffer.Data with
+        {
+            TexSize = current.Size,
+            Scale = Strength2 + 4f,
+            Iterations = Strength3,
+            Time = shaderTime
+        };
+    }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public record struct WarpParameters
     {
         public UniformVector2 TexSize;
-        public UniformFloat PhaseSpeed;
         public UniformFloat Scale;
         public UniformFloat Iterations;
         public UniformFloat Time;
-        public UniformPadding8 pad;
+        public UniformPadding12 pad;
     }
 }

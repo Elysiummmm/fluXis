@@ -1,7 +1,6 @@
 layout(std140, set = 0, binding = 0) uniform m_WarpParameters
 {
     vec2 TexSize;
-    float PhaseSpeed;
     float Scale;
     float Iterations;
     float Time;
@@ -19,7 +18,7 @@ highp float random(highp vec2 st)
 
 highp float noise(vec2 pos) {
     pos *= Scale;
-    pos += Time * PhaseSpeed;
+    pos += Time;
 
     vec2 ipos = floor(pos);
     vec2 fpos = fract(pos);
