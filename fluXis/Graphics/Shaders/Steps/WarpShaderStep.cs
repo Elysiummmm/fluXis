@@ -17,7 +17,7 @@ public class WarpShaderStep : ShaderStep<WarpShaderStep.WarpParameters>
         TexSize = current.Size,
         PhaseSpeed = Strength,
         Scale = Strength2 + 4f,
-        Iterations = (int)Strength3,
+        Iterations = Strength3,
         Time = (float)Time.Current / 1000f
     };
 
@@ -27,7 +27,7 @@ public class WarpShaderStep : ShaderStep<WarpShaderStep.WarpParameters>
         public UniformVector2 TexSize;
         public UniformFloat PhaseSpeed;
         public UniformFloat Scale;
-        public UniformInt Iterations;
+        public UniformFloat Iterations;
         public UniformFloat Time;
         public UniformPadding8 pad;
     }

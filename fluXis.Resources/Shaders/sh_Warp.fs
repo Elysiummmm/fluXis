@@ -3,7 +3,7 @@ layout(std140, set = 0, binding = 0) uniform m_WarpParameters
     vec2 TexSize;
     float PhaseSpeed;
     float Scale;
-    int Iterations;
+    float Iterations;
     float Time;
 };
 
@@ -55,14 +55,23 @@ highp vec2 fbm(vec2 pos) {
 void main(void)
 {
     vec2 uv = gl_FragCoord.xy / TexSize;
-    vec2 warpedUV = fbm(uv);
+    
+    float weight = 1.0;
+    if (Iterations < 1.0) { weight = fract(Iterations); }
+    
+    vec2 warpedUV = fbm(uv) * weight;
 
-    for (int i = 1; i < Iterations; i++) {
-        warpedUV += fbm(warpedUV);
+    for (int i = 1; i < int(ceil(Iterations)); i++) {
+        float weight = min(Iterations - float(i), 1.0);
+
+        vec2 warp = fbm(warpedUV);
+        warpedUV += warp * weight;
     }
 
+    vec2 offsetFactor = vec2(Iterations / 4.0 * 0.07);
+
     warpedUV /= 10.0;
-    warpedUV += uv - vec2(0.05);
+    warpedUV += uv - offsetFactor;
 
     vec4 pixelColor = textureLod(sampler2D(m_Texture, m_Sampler), warpedUV, 0.0);
     o_Colour = pixelColor;

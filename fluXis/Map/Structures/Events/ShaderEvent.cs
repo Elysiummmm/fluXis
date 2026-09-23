@@ -186,7 +186,7 @@ public enum ShaderType
 
     [ShaderStrength(1, Max = 5f, ParamName = "Scroll Speed")]
     [ShaderStrength(2, Max = 10f, ParamName = "Scale")]
-    [ShaderStrength(3, Max = 4f, Step = 1f, ParamName = "Iterations")]
+    [ShaderStrength(3, Max = 4f, ParamName = "Iterations")]
     Warp,
 
     [ShaderStrength(1, Max = 2f)]
